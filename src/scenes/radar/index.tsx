@@ -8,18 +8,45 @@ import {
 } from "three/examples/jsm/Addons.js";
 import { useWebSocket } from "../test/websocket";
 
+interface Dimensions {
+  width: number;
+  height: number;
+}
+
+let mapScale: Dimensions = { width: 1, height: 1 };
 const convertGamePositionToMap = (position: Position): THREE.Vector3 => {
   const v3: THREE.Vector3 = new THREE.Vector3();
-  const mapScale = 0.26;
-  const x = position.x * mapScale;
-  const y = position.z * mapScale;
+  const customScale = 1;
+  const x = position.x * customScale * mapScale.width;
+  const y = position.z * customScale * mapScale.height;
   v3.set(x, y, 0.1);
 
   return v3;
 };
 
-let mapWidth;
-let mapHeight;
+const calculateMapScale = (
+  geometry: THREE.PlaneGeometry,
+  texture: THREE.Texture
+): Dimensions => {
+  const mapWidth = geometry.parameters.width;
+  const mapHeight = geometry.parameters.height;
+
+  const image = texture.image as HTMLImageElement; // Cast to HTMLImageElement for TypeScript
+  const originalWidth = image.width;
+  const originalHeight = image.height;
+
+  const xScale = mapWidth / originalWidth;
+  const yScale = mapHeight / originalHeight;
+
+  console.log(
+    `Original Image Dimensions: ${originalWidth} x ${originalHeight}`
+  );
+  console.log(`Scale: ${xScale} x ${yScale}`);
+
+  return { width: xScale, height: yScale };
+};
+
+let map: THREE.Mesh;
 const setupMap = (scene: THREE.Scene): void => {
   // Load and display image
   const loader = new THREE.TextureLoader();
@@ -40,8 +67,6 @@ const setupMap = (scene: THREE.Scene): void => {
     }
 
     const geometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
-    mapWidth = planeWidth;
-    mapHeight = planeHeight;
     console.log(`Map Dimensions: ${planeWidth}x${planeHeight}`);
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const mesh = new THREE.Mesh(geometry, material);
@@ -49,6 +74,8 @@ const setupMap = (scene: THREE.Scene): void => {
 
     // Add mesh to the scene
     scene.add(mesh);
+    map = mesh;
+    mapScale = calculateMapScale(geometry, texture);
   });
 };
 
@@ -185,6 +212,9 @@ const RadarScene: React.FC = () => {
       renderer.setSize(width, height);
 
       // If you are using an image, update its scale or position here as needed
+      setupMap(scene);
+      scene.remove(map);
+      refreshAll();
     };
 
     window.addEventListener("resize", handleResize);
