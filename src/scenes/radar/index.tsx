@@ -1,6 +1,12 @@
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
-import { IRustRadarData, Ore, Player, Position } from "./radarData.interface";
+import {
+  IRustRadarData,
+  LootContainer,
+  Ore,
+  Player,
+  Position,
+} from "./radarData.interface";
 import {
   FontLoader,
   TextGeometry,
@@ -13,6 +19,7 @@ interface PreloadedTextures {
   metal?: THREE.Texture;
   stone?: THREE.Texture;
   hazmat?: THREE.Texture;
+  basic_crate_2?: THREE.Texture;
 }
 const preloadedTextures: PreloadedTextures = {};
 
@@ -84,6 +91,7 @@ const setupMap = (scene: THREE.Scene): void => {
     scene.add(mesh);
     map = mesh;
     mapScale = calculateMapScale(geometry, texture);
+    scene.background = new THREE.Color(0x3b8493);
   });
 };
 
@@ -245,6 +253,7 @@ const loadTextures = (): void => {
   preloadedTextures.metal = textureLoader.load("/icons/metal.ore.png");
   preloadedTextures.stone = textureLoader.load("/icons/stones.png");
   preloadedTextures.hazmat = textureLoader.load("/icons/hazmatsuit.png");
+  preloadedTextures.basic_crate_2 = textureLoader.load("/icons/crate.png");
 };
 
 const RadarScene: React.FC = () => {
@@ -252,8 +261,7 @@ const RadarScene: React.FC = () => {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-
-  const data = useWebSocket();
+  const { data, closeConnection } = useWebSocket();
 
   // Initialize Three.js scene, camera, and renderer
   useEffect(() => {
@@ -357,12 +365,9 @@ const RadarScene: React.FC = () => {
       ...extractProperties(parsed.nodes.sulfur, "id"),
       ...extractProperties(parsed.nodes.metal, "id"),
       ...extractProperties(parsed.nodes.stone, "id"),
+      ...extractProperties(parsed.loot, "id"),
     ]);
 
-    // const players: Player[] = parsed.players ?? [];
-    // players.forEach((player) => {
-    //   addPlayer(scene, player);
-    // });
     const players: Player[] = parsed.players ?? [];
     players.forEach((player) => {
       addItem({
@@ -430,24 +435,21 @@ const RadarScene: React.FC = () => {
       });
     });
 
-    // const sulfur: Ore[] = parsed.nodes.sulfur ?? [];
-    // sulfur.forEach((node) => {
-    //   addItem(scene, node);
-    // });
-
-    // const previousSulfur = Object.keys(sceneItems);
-    // previousSulfur.forEach((itemKey) => {
-    //   if (!sulfur.find((sulfur) => sulfur.id == itemKey))
-    //     delete sceneItems[itemKey];
-    // });
-
-    // const previousPlayers = Object.keys(playerSceneItems);
-    // previousPlayers.forEach((itemKey) => {
-    //   if (!players.find((player) => player.name == itemKey))
-    //     delete playerSceneItems[itemKey];
-    // });
-
-    // You may need to re-render the scene here if necessary
+    const lootContainer: LootContainer[] = parsed.loot ?? [];
+    lootContainer.forEach((loot) => {
+      if (loot.name === "crate_normal_2")
+        addItem({
+          scene,
+          identifier: loot.id,
+          position: new THREE.Vector3(
+            loot.position.x,
+            loot.position.y,
+            loot.position.z
+          ),
+          texture: preloadedTextures.basic_crate_2 as THREE.Texture,
+          scale: new THREE.Vector3(6, 6, 1),
+        });
+    });
   }, [data]); // Depend on WebSocket data
 
   return <div ref={mountRef} />;

@@ -19,6 +19,12 @@ export interface Ore {
   position: Position;
 }
 
+export interface LootContainer {
+  id: string;
+  name: string;
+  position: Position;
+}
+
 export interface IRustRadarData {
   players: Player[];
   nodes: {
@@ -26,4 +32,5 @@ export interface IRustRadarData {
     stone: Ore[];
     metal: Ore[];
   };
+  loot: LootContainer[];
 }

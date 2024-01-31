@@ -1,48 +1,40 @@
 import React, { useState } from "react";
 import { useWebSocket } from "../test/websocket";
+import ReactJson from "react-json-view";
 
 const DataScene: React.FC = () => {
-  const latestData = useWebSocket();
-  const [frozenData, setFrozenData] = useState<string | null>(null);
+  const { data: latestData, closeConnection } = useWebSocket();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [frozenData, setFrozenData] = useState<any>(null);
   const [isFrozen, setIsFrozen] = useState<boolean>(false);
 
   const toggleFreeze = () => {
     if (!isFrozen) {
-      setFrozenData(latestData); // Freeze the current data
+      setFrozenData(latestData ? JSON.parse(latestData) : null); // Freeze the current data
     }
     setIsFrozen(!isFrozen); // Toggle the frozen state
-  };
-
-  // Beautify JSON data
-  const beautifyJson = (data: string | null) => {
-    if (!data) return null;
-    try {
-      const parsedData = JSON.parse(data);
-      return JSON.stringify(parsedData, null, 2); // Indent with 2 spaces
-    } catch (error) {
-      console.error("Error parsing JSON: ", error);
-      return "Invalid JSON data";
-    }
   };
 
   return (
     <div>
       <h1>Latest WebSocket Data</h1>
-      <pre
-        style={{
-          maxHeight: "400px",
-          overflowY: "auto",
-          backgroundColor: "#f0f0f0",
-          padding: "10px",
-          border: "1px solid #ccc",
-        }}
-      >
-        {beautifyJson(isFrozen ? frozenData : latestData)}
-      </pre>
+      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <ReactJson
+          src={
+            isFrozen ? frozenData : latestData ? JSON.parse(latestData) : null
+          }
+          theme="apathy:inverted"
+          collapsed={false}
+          enableClipboard={false}
+          displayDataTypes={false}
+        />
+      </div>
       <button onClick={toggleFreeze}>
         {isFrozen ? "Unfreeze Data" : "Freeze Data"}
       </button>
+      <button onClick={closeConnection}>Disconnect WebSocket</button>
     </div>
   );
 };
+
 export default DataScene;

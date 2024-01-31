@@ -1,52 +1,53 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 
 // Create a context
-const WebSocketContext = createContext<string | null>(null);
+const WebSocketContext = createContext<{
+  data: string | null;
+  closeConnection: () => void;
+}>({ data: null, closeConnection: () => {} });
 
 type WebSocketProviderProps = {
-  children: ReactNode; // This types the children prop
+  children: ReactNode;
 };
 
-export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
-  children,
-}) => {
+export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [data, setData] = useState<string | null>(null);
+  const websocketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://192.168.1.19:9002");
+    websocketRef.current = new WebSocket("ws://192.168.1.19:9002");
 
-    socket.onopen = () => {
+    websocketRef.current.onopen = () => {
       console.log("WebSocket connected");
-      // Optional: Send data to server
-      // socket.send('Hello Server!');
     };
 
-    socket.onmessage = (event) => {
-      // console.log("Message from server ", event.data);
+    websocketRef.current.onmessage = (event) => {
       setData(event.data);
     };
 
-    socket.onerror = (error) => {
+    websocketRef.current.onerror = (error) => {
       console.error("WebSocket error: ", error);
     };
 
-    socket.onclose = () => {
+    websocketRef.current.onclose = () => {
       console.log("WebSocket disconnected");
+    };
+
+    return () => {
+      websocketRef.current?.close();
     };
   }, []);
 
+  const closeConnection = () => {
+    websocketRef.current?.close();
+  };
+
   return (
-    <WebSocketContext.Provider value={data}>
+    <WebSocketContext.Provider value={{ data, closeConnection }}>
       {children}
     </WebSocketContext.Provider>
   );
 };
 
-// Custom hook to use the WebSocket data
+// Custom hook to use the WebSocket data and close function
 export const useWebSocket = () => useContext(WebSocketContext);
