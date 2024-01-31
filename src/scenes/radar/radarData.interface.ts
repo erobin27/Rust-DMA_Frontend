@@ -5,6 +5,7 @@ export interface Position {
 }
 
 export interface Player {
+  id: string;
   name: string;
   team: number;
   bags: number;
@@ -13,6 +14,7 @@ export interface Player {
 }
 
 export interface Ore {
+  id: string;
   name: string;
   position: Position;
 }
