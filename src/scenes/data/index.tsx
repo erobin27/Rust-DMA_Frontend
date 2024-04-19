@@ -5,10 +5,7 @@ import ReactJson from "react-json-view";
 import { Box, Button } from "@mui/material";
 
 const DataScene: React.FC = () => {
-  const {
-    data,
-    closeConnection,
-  } = useWebSocket();
+  const { data, closeConnection } = useWebSocket();
 
   const [frozenData, setFrozenData] = useState<any>(null);
   const [isFrozen, setIsFrozen] = useState<boolean>(false);
@@ -20,7 +17,18 @@ const DataScene: React.FC = () => {
     setIsFrozen(!isFrozen); // Toggle the frozen state
   };
 
-  console.log(isFrozen ? frozenData : data);
+  const copyToClipboard = () => {
+    const copied = JSON.stringify(isFrozen ? frozenData : data);
+    navigator.clipboard.writeText(copied).then(
+      () => {
+        console.log("Copied data to clipboard.");
+      },
+      () => {
+        console.log("Failed to copy data to clipboard.");
+      }
+    );
+  };
+
   return (
     <div>
       <h1>Latest WebSocket Data</h1>
@@ -40,51 +48,10 @@ const DataScene: React.FC = () => {
         <Button
           variant="contained"
           color="info"
-          onClick={() => setSelectedData("playerData")}
-          disabled={isFrozen}
+          onClick={() => copyToClipboard()}
+          // disabled={isFrozen}
         >
-          Player Data
-        </Button>
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => setSelectedData("nodeData")}
-          disabled={isFrozen}
-        >
-          Node Data
-        </Button>
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => setSelectedData("lootData")}
-          disabled={isFrozen}
-        >
-          Loot Data
-        </Button>
-
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => setSelectedData("removePlayerData")}
-          disabled={isFrozen}
-        >
-          Remove Player Data
-        </Button>
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => setSelectedData("removeNodeData")}
-          disabled={isFrozen}
-        >
-          Remove Node Data
-        </Button>
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => setSelectedData("removeLootData")}
-          disabled={isFrozen}
-        >
-          Remove Loot Data
+          Copy
         </Button>
 
         <Button variant="contained" color="error" onClick={closeConnection}>
