@@ -23,9 +23,10 @@ const defaultSceneItems: ISceneItems = {
   nodes: {},
 };
 
-const zeroVector = new THREE.Vector3(0, 0, 0);
-
-let count = 1;
+const enum ItemTypes {
+  TEXT = "TEXT",
+  SPRITE = "SPRITE",
+}
 
 const Radar: React.FC<{
   settings: Settings;
@@ -63,11 +64,6 @@ const Radar: React.FC<{
   };
 
   const addItemRevised = async (input: AddItem): Promise<ISceneItem> => {
-    const enum ItemTypes {
-      TEXT = "TEXT",
-      SPRITE = "SPRITE",
-    }
-
     const { category, zoomFactor } = input;
     const position = convertGamePositionToMap(input.position);
 
@@ -128,29 +124,45 @@ const Radar: React.FC<{
     scene.clear();
   };
 
-  const removeSceneItemsById = (
+  const removeSceneItemsByIdRevised = (
     scene: THREE.Scene,
     identifiers: string[],
-    category: Category
   ): void => {
-    console.log("removing", identifiers);
-    const sceneItemsCopy = JSON.parse(JSON.stringify(sceneItems)); // Deep copy
+    identifiers.map((id) => {
+      const spriteId = `${ItemTypes.SPRITE}_${id}`;
+      const existingSprite = scene.getObjectByName(spriteId);
 
-    for (const id of identifiers) {
-      const item = sceneItemsCopy[category][id];
-      if (!item) continue;
-      console.log(item);
+      const textId = `${ItemTypes.TEXT}_${id}`;
+      const existingText = scene.getObjectByName(textId);
 
-      const { text, dot, sprite } = item;
-      if (dot) scene.remove(dot as THREE.Mesh);
-      if (text) scene.remove(text as THREE.Mesh);
-      if (sprite) scene.remove(sprite as THREE.Sprite);
-
-      delete sceneItemsCopy[category][id];
-    }
-
-    setSceneItems(sceneItemsCopy);
+      existingSprite?.remove();
+      existingText?.remove();
+    });
   };
+
+  // const removeSceneItemsById = (
+  //   scene: THREE.Scene,
+  //   identifiers: string[],
+  //   category: Category
+  // ): void => {
+  //   console.log("removing", identifiers);
+  //   const sceneItemsCopy = JSON.parse(JSON.stringify(sceneItems)); // Deep copy
+
+  //   for (const id of identifiers) {
+  //     const item = sceneItemsCopy[category][id];
+  //     if (!item) continue;
+  //     console.log(item);
+
+  //     const { text, dot, sprite } = item;
+  //     if (dot) scene.remove(dot as THREE.Mesh);
+  //     if (text) scene.remove(text as THREE.Mesh);
+  //     if (sprite) scene.remove(sprite as THREE.Sprite);
+
+  //     delete sceneItemsCopy[category][id];
+  //   }
+
+  //   setSceneItems(sceneItemsCopy);
+  // };
 
   /*
    ************************************
@@ -387,7 +399,7 @@ const Radar: React.FC<{
           },
           position: playerPosition,
           texture: preloadedTextures.localPlayer as THREE.Texture,
-          scale: new THREE.Vector3(.5, .5, .5),
+          scale: new THREE.Vector3(0.5, 0.5, 0.5),
           zoomFactor: calculateCameraZoomScale(),
           layerPosition: 1,
           category: "players",
@@ -459,7 +471,7 @@ const Radar: React.FC<{
           // keys = Object.keys(sceneItems.nodes).length
           //   ? Object.keys(sceneItems.nodes[key])
           //   : undefined;
-          // if (keys) removeSceneItemsById(scene, keys, "nodes");
+          // if (keys) removeSceneItemsByIdRevised(scene, keys);
           console.log("TODO: Remove from scene.");
           break;
         case "crate_normal_2":
