@@ -7,36 +7,16 @@ import React, {
   useRef,
 } from "react";
 import {
-  IMessage,
-  LootContainerMessage,
-  NodeMessage,
+  IRustRadarData,
 } from "../radar/interfaces/game/rustRadarData.interface";
-import { Player } from "../radar/interfaces/game/player.interface";
 
 // Create a context
 const WebSocketContext = createContext<{
-  nodeData: NodeMessage | null;
-  lootData: LootContainerMessage | null;
-  playerData: Player[] | null;
-
-  refreshPlayers: Player[] | null;
-
-  removeLoot: string[] | null;
-  removeNodes: string[] | null;
-  removePlayers: string[] | null;
+  data: IRustRadarData | null;
 
   closeConnection: () => void;
 }>({
-  nodeData: null,
-  lootData: null,
-  playerData: null,
-
-  refreshPlayers: null,
-
-  removeLoot: null,
-  removeNodes: null,
-  removePlayers: null,
-
+  data: null,
   closeConnection: () => {},
 });
 
@@ -47,54 +27,24 @@ type WebSocketProviderProps = {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
-  const [nodeData, setNodeData] = useState<NodeMessage | null>(null);
-  const [removeNodes, setRemoveNodes] = useState<string[] | null>(null);
-
-  const [lootData, setLootData] = useState<LootContainerMessage | null>(null);
-  const [removeLoot, setRemoveLoot] = useState<string[] | null>(null);
-
-  const [playerData, setPlayerData] = useState<Player[] | null>(null);
-  const [refreshPlayers, setRefreshPlayers] = useState<Player[] | null>(null);
-  const [removePlayers, setRemovePlayers] = useState<string[] | null>(null);
+  const [data, setData] = useState(null);
 
   const websocketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    websocketRef.current = new WebSocket("ws://192.168.1.19:9002");
+    // const localMachineIpv4 = "192.168.1.94";
+    // const port = "9002";
+    const localMachineIpv4 = "localhost";
+    const port = "8765";
+    websocketRef.current = new WebSocket(`ws://${localMachineIpv4}:${port}`);
 
     websocketRef.current.onopen = () => {
       console.log("WebSocket connected");
     };
 
     websocketRef.current.onmessage = (event) => {
-      const parsed: IMessage = JSON.parse(event.data);
-      switch (parsed.type) {
-        case "PLAYERS_ADD":
-          setPlayerData(parsed.payload);
-          break;
-        case "PLAYERS_REFRESH":
-          setRefreshPlayers(parsed.payload);
-          break;
-        case "PLAYERS_REMOVE":
-          setRemovePlayers(parsed.payload);
-          break;
-
-        case "NODES_ADD":
-          setNodeData(parsed.payload);
-          break;
-        case "NODES_REMOVE":
-          setRemoveNodes(parsed.payload);
-          break;
-
-        case "LOOT_ADD":
-          setLootData(parsed.payload);
-          break;
-        case "LOOT_REMOVE":
-          setRemoveLoot(parsed.payload);
-          break;
-        default:
-          console.log("idk", parsed);
-      }
+      const parsed = JSON.parse(event.data);
+      setData(parsed);
     };
 
     websocketRef.current.onerror = (error) => {
@@ -117,15 +67,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   return (
     <WebSocketContext.Provider
       value={{
-        nodeData,
-        lootData,
-        playerData,
-
-        refreshPlayers,
-
-        removeLoot,
-        removeNodes,
-        removePlayers,
+        data,
 
         closeConnection,
       }}

@@ -15,6 +15,7 @@ import { convertGamePositionToMap, map, setupMap } from "./helpers/map";
 import { Settings } from "./interfaces/radar/settings.interface";
 import { LootContainer } from "./interfaces/game/items/lootContainer.interface";
 import { LootContainerType } from "./interfaces/game/items/lootContainers.type";
+import { IRustRadarData } from "./interfaces/game/rustRadarData.interface";
 
 const defaultSceneItems: ISceneItems = {
   players: {},
@@ -23,6 +24,8 @@ const defaultSceneItems: ISceneItems = {
 };
 
 const zeroVector = new THREE.Vector3(0, 0, 0);
+
+let count = 1;
 
 const Radar: React.FC<{
   settings: Settings;
@@ -43,14 +46,7 @@ const Radar: React.FC<{
   const [sceneItems, setSceneItems] = useState<ISceneItems>(defaultSceneItems);
 
   // Websocket/Data
-  const {
-    nodeData,
-    lootData,
-    playerData,
-
-    removeLoot,
-    removeNodes,
-  } = useWebSocket();
+  const { data } = useWebSocket();
   const { settings } = props;
 
   /*
@@ -62,58 +58,71 @@ const Radar: React.FC<{
    *                                  *
    ************************************
    */
-
   const calculateCameraZoomScale = (): number => {
     return 5 / (cameraRef.current?.zoom ?? 1);
   };
 
-  const addItem = async (input: AddItem): Promise<ISceneItem> => {
-    const { category, zoomFactor } = input;
-    if (input.position.equals(zeroVector)) {
-      console.log("Not rendering", input);
-      return;
+  const addItemRevised = async (input: AddItem): Promise<ISceneItem> => {
+    const enum ItemTypes {
+      TEXT = "TEXT",
+      SPRITE = "SPRITE",
     }
-    let text;
-    let sprite;
+
+    const { category, zoomFactor } = input;
     const position = convertGamePositionToMap(input.position);
-    const item = sceneItems[category][input.identifier];
-    if (!item) {
+
+    const spriteId = `${ItemTypes.SPRITE}_${input.identifier}`;
+    const existingSprite = input.scene.getObjectByName(spriteId);
+
+    const textId = `${ItemTypes.TEXT}_${input.identifier}`;
+    const existingText = input.scene.getObjectByName(textId);
+
+    let sprite: THREE.Sprite = existingSprite as THREE.Sprite;
+    let text = existingText;
+
+    // No sprite exists yet
+    if (!existingSprite) {
       const spriteMaterial = new THREE.SpriteMaterial({ map: input.texture });
       sprite = new THREE.Sprite(spriteMaterial);
       sprite.position.set(position.x, position.y, position.z);
       const scale = input.scale.clone().multiplyScalar(zoomFactor ?? 1);
       sprite.scale.set(scale.x, scale.y, input.scale.z);
+      sprite.name = spriteId;
       input.scene.add(sprite);
-
-      if (input.label) {
-        text = await addText(input.label.text, input.label.color, {
-          size: input.label.size,
-        });
-        input.scene.add(text as THREE.Mesh);
-      }
-
-      const sceneItemsCopy = { ...sceneItems };
-      sceneItemsCopy[category][input.identifier] = {
-        text,
-        sprite,
-        originalScale: input.scale,
-      };
-      setSceneItems(sceneItemsCopy);
-    } else {
-      text = item.text;
-      sprite = item.sprite;
     }
 
-    sprite?.position.set(position.x, position.y, input.layerPosition ?? 0.1);
+    // No text label exists yet and should be created
+    if (!existingText && input.label) {
+      text = await addText({
+        textId,
+        textString: input.label.text,
+        color: input.label.color,
+        parameters: {
+          size: input.label.size,
+        },
+      });
+      input.scene.add(text as THREE.Mesh);
+    }
 
-    const textPosition = position;
-    textPosition.setZ(input.layerPosition ?? 0.1);
-    textPosition.setY(position.y - (input.label?.offset ?? 10));
-    if (text) alignText(text, textPosition);
-    return { text, sprite, originalScale: input.scale };
+    // Set the sprite's position
+    if (sprite) {
+      const layerPosition = input.layerPosition ?? 0.1;
+      sprite.position.set(position.x, position.y, layerPosition);
+    }
+
+    // Set the position of the text
+    if (text) {
+      const textPosition = position;
+      textPosition.setZ(input.layerPosition ?? 0.1);
+      textPosition.setY(position.y - (input.label?.offset ?? 10));
+      alignText(text as THREE.Mesh, textPosition);
+    }
+
+    return { text: text as THREE.Mesh, sprite, originalScale: input.scale };
   };
 
   const refreshAll = (scene: THREE.Scene): void => {
+    console.log("REFRESHING ALL");
     setSceneItems({ ...defaultSceneItems });
 
     scene.clear();
@@ -124,11 +133,13 @@ const Radar: React.FC<{
     identifiers: string[],
     category: Category
   ): void => {
+    console.log("removing", identifiers);
     const sceneItemsCopy = JSON.parse(JSON.stringify(sceneItems)); // Deep copy
 
     for (const id of identifiers) {
       const item = sceneItemsCopy[category][id];
       if (!item) continue;
+      console.log(item);
 
       const { text, dot, sprite } = item;
       if (dot) scene.remove(dot as THREE.Mesh);
@@ -140,23 +151,6 @@ const Radar: React.FC<{
 
     setSceneItems(sceneItemsCopy);
   };
-
-  // const removeSceneItems = (
-  //   scene: THREE.Scene,
-  //   sceneItems: ISceneItem[],
-  //   category: string,
-  // ): void => {
-  //   for (const item of sceneItems) {
-  //     const { text, dot, sprite } = item;
-  //     if (dot) scene.remove(dot as THREE.Mesh);
-  //     if (text) scene.remove(text as THREE.Mesh);
-  //     if (sprite) scene.remove(sprite as THREE.Sprite);
-
-  //     const sceneItemsCopy = { ...sceneItems };
-  //     delete sceneItemsCopy[category][item.key];
-  //     setSceneItems(sceneItemsCopy);
-  //   }
-  // };
 
   /*
    ************************************
@@ -264,12 +258,113 @@ const Radar: React.FC<{
   }, []);
 
   useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene || !playerData) return;
-    console.log(Object.values(sceneItems.players));
-    removeSceneItemsById(scene, Object.keys(sceneItems.players), "players");
+    const addOrUpdateNodes = (
+      nodeData: IRustRadarData["nodes"] | undefined
+    ): void => {
+      if (!scene || !nodeData) return;
 
-    const addPlayerItems = async () => {
+      // removeSceneItemsById(scene, Object.keys(sceneItems.nodes), "nodes");
+
+      const sulfur: Item[] = nodeData.sulfur ?? [];
+      if (settings.sulfur)
+        sulfur.forEach((node) => {
+          addItemRevised({
+            scene,
+            identifier: node.id,
+            position: new THREE.Vector3(
+              node.position.x,
+              node.position.y,
+              node.position.z
+            ),
+            texture: preloadedTextures.sulfur as THREE.Texture,
+            scale: new THREE.Vector3(1, 1, 1),
+            zoomFactor: calculateCameraZoomScale(),
+            category: "nodes",
+          });
+        });
+
+      const metal: Item[] = nodeData.metal ?? [];
+      if (settings.metal)
+        metal.forEach((node) => {
+          addItemRevised({
+            scene,
+            identifier: node.id,
+            position: new THREE.Vector3(
+              node.position.x,
+              node.position.y,
+              node.position.z
+            ),
+            texture: preloadedTextures.metal as THREE.Texture,
+            scale: new THREE.Vector3(1, 1, 1),
+            zoomFactor: calculateCameraZoomScale(),
+            category: "nodes",
+          });
+        });
+
+      const stone: Item[] = nodeData.stone ?? [];
+      if (settings.stones)
+        stone.forEach((node) => {
+          addItemRevised({
+            scene,
+            identifier: node.id,
+            position: new THREE.Vector3(
+              node.position.x,
+              node.position.y,
+              node.position.z
+            ),
+            texture: preloadedTextures.stone as THREE.Texture,
+            scale: new THREE.Vector3(1, 1, 1),
+            zoomFactor: calculateCameraZoomScale(),
+            category: "nodes",
+          });
+        });
+    };
+
+    const addOrUpdateLoot = (
+      lootData: IRustRadarData["loot"] | undefined
+    ): void => {
+      if (!scene || !lootData) return;
+
+      const displayCrate = (key: LootContainerType) => {
+        if (settings[key] === undefined) {
+          // console.log(`Key not found in settings - (${key})`);
+          return;
+        }
+
+        if (preloadedTextures[key] === undefined) {
+          console.log(`Key not found in preloadedTextures - (${key})`);
+          return;
+        }
+
+        const crate: LootContainer[] = lootData[key] ?? [];
+        if (settings[key])
+          crate.forEach((node) => {
+            addItemRevised({
+              scene,
+              identifier: node.id,
+              position: new THREE.Vector3(
+                node.position.x,
+                node.position.y,
+                node.position.z
+              ),
+              texture: preloadedTextures[key] as THREE.Texture,
+              scale: new THREE.Vector3(6, 6, 1),
+              zoomFactor: calculateCameraZoomScale(),
+              category: "loot",
+            });
+          });
+      };
+
+      Object.keys(lootData).forEach((key) =>
+        displayCrate(key as LootContainerType)
+      );
+    };
+
+    const addOrUpdatePlayers = async (
+      playerData: IRustRadarData["players"] | undefined
+    ): Promise<void> => {
+      if (!scene || !playerData) return;
+
       for (const player of playerData) {
         const playerPosition = new THREE.Vector3(
           player.position.x,
@@ -281,171 +376,35 @@ const Radar: React.FC<{
           return;
         }
 
-        const item = await addItem({
+        const item = await addItemRevised({
           scene,
-          identifier: "test",
+          identifier: player.id,
           label: {
             text: player.name,
             color: "#00FF00",
-            size: 3,
-            offset: 5,
+            size: 2,
+            offset: 2,
           },
           position: playerPosition,
           texture: preloadedTextures.localPlayer as THREE.Texture,
-          scale: new THREE.Vector3(5, 5, 1),
+          scale: new THREE.Vector3(.5, .5, .5),
           zoomFactor: calculateCameraZoomScale(),
           layerPosition: 1,
           category: "players",
         });
 
-        if (player.name === "love") {
+        if (player.name.startsWith("love")) {
           setTargetCameraPosition(item.sprite?.clone().position);
         }
       }
     };
 
-    addPlayerItems();
-  }, [playerData]);
-
-  // useEffect(() => {
-  //   const scene = sceneRef.current;
-  //   if (!scene || !refreshPlayers) return;
-
-  //   refreshPlayers.forEach((player) => {
-  //     addItem({
-  //       scene,
-  //       identifier: player.name,
-  //       label: {
-  //         text: player.name,
-  //         color: "#00FF00",
-  //         size: 3,
-  //         offset: 5,
-  //       },
-  //       position: new THREE.Vector3(
-  //         player.position.x,
-  //         player.position.y,
-  //         player.position.z
-  //       ),
-  //       texture: preloadedTextures.hazmat as THREE.Texture,
-  //       scale: new THREE.Vector3(8, 8, 1),
-  //       layerPosition: 1,
-  //       category: "players",
-  //     });
-  //   });
-  // }, [refreshPlayers]);
-
-  useEffect(() => {
     const scene = sceneRef.current;
-    if (!scene || !nodeData) return;
-    removeSceneItemsById(scene, Object.keys(sceneItems.nodes), "nodes");
 
-    const sulfur: Item[] = nodeData.sulfur ?? [];
-    sulfur.forEach((node) => {
-      addItem({
-        scene,
-        identifier: node.id,
-        position: new THREE.Vector3(
-          node.position.x,
-          node.position.y,
-          node.position.z
-        ),
-        texture: preloadedTextures.sulfur as THREE.Texture,
-        scale: new THREE.Vector3(6, 6, 1),
-        zoomFactor: calculateCameraZoomScale(),
-        category: "nodes",
-      });
-    });
-
-    const metal: Item[] = nodeData.metal ?? [];
-    if (settings.metal)
-      metal.forEach((node) => {
-        addItem({
-          scene,
-          identifier: node.id,
-          position: new THREE.Vector3(
-            node.position.x,
-            node.position.y,
-            node.position.z
-          ),
-          texture: preloadedTextures.metal as THREE.Texture,
-          scale: new THREE.Vector3(6, 6, 1),
-          zoomFactor: calculateCameraZoomScale(),
-          category: "nodes",
-        });
-      });
-
-    const stone: Item[] = nodeData.stone ?? [];
-    if (settings.stones)
-      stone.forEach((node) => {
-        addItem({
-          scene,
-          identifier: node.id,
-          position: new THREE.Vector3(
-            node.position.x,
-            node.position.y,
-            node.position.z
-          ),
-          texture: preloadedTextures.stone as THREE.Texture,
-          scale: new THREE.Vector3(6, 6, 1),
-          zoomFactor: calculateCameraZoomScale(),
-          category: "nodes",
-        });
-      });
-  }, [nodeData]);
-
-  useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene || !lootData) return;
-    removeSceneItemsById(scene, Object.keys(sceneItems.loot), "loot");
-
-    const displayCrate = (key: LootContainerType) => {
-      if (settings[key] === undefined) {
-        console.log(`Key not found in settings - (${key})`);
-        return;
-      }
-
-      if (preloadedTextures[key] === undefined) {
-        console.log(`Key not found in preloadedTextures - (${key})`);
-        return;
-      }
-
-      const crate: LootContainer[] = lootData[key] ?? [];
-      if (settings[key])
-        crate.forEach((node) => {
-          addItem({
-            scene,
-            identifier: node.id,
-            position: new THREE.Vector3(
-              node.position.x,
-              node.position.y,
-              node.position.z
-            ),
-            texture: preloadedTextures[key] as THREE.Texture,
-            scale: new THREE.Vector3(6, 6, 1),
-            zoomFactor: calculateCameraZoomScale(),
-            category: "loot",
-          });
-        });
-    };
-
-    Object.keys(lootData).forEach((key) =>
-      displayCrate(key as LootContainerType)
-    );
-  }, [lootData]);
-
-  useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene || !removeLoot) return;
-
-    removeSceneItemsById(scene, removeLoot, "loot");
-  }, [removeLoot]);
-
-  useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene || !removeNodes) return;
-
-    removeSceneItemsById(scene, removeNodes, "nodes");
-  }, [removeNodes]);
+    addOrUpdateNodes(data?.nodes);
+    addOrUpdatePlayers(data?.players);
+    // addOrUpdateLoot(data?.loot);
+  }, [data]);
 
   /*
     If an option is disabled in settings then

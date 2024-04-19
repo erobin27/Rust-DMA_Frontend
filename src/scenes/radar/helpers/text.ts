@@ -19,13 +19,19 @@ export const alignText = (text: THREE.Mesh, position: THREE.Vector3): void => {
   }
 };
 
+interface AddTextInput {
+  textId: string;
+  textString: string;
+  color: string;
+  parameters: Omit<TextGeometryParameters, "font">;
+  position?: Position;
+}
+
 export const addText = async (
-  textString: string,
-  color: string,
-  parameters: Omit<TextGeometryParameters, "font">,
-  position?: Position
+  input: AddTextInput
 ): Promise<ISceneItem["text"]> => {
   const loader = new FontLoader();
+  const { textId, textString, color, parameters, position } = input;
 
   return new Promise((resolve) => {
     loader.load("fonts/helvetiker_regular.typeface.json", function (font) {
@@ -37,6 +43,7 @@ export const addText = async (
       const textMaterial = new THREE.MeshBasicMaterial({ color });
       const text = new THREE.Mesh(textGeometry, textMaterial);
       text.position.set(position?.x ?? 0, position?.y ?? 0, position?.z ?? 0.1);
+      text.name = textId;
       resolve(text);
     });
   });

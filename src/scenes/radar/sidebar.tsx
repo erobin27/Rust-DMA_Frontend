@@ -140,6 +140,7 @@ export const SideBar = ({
 
           {/* MENU ITEMS */}
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
+            <ItemHeading category="Players" />
             <ItemHeading category="Nodes" />
             <Item
               title="Sulfur"
