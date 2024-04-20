@@ -1,6 +1,6 @@
 export interface Settings {
   sulfur: boolean;
-  stones: boolean;
+  stone: boolean;
   metal: boolean;
 
   crate_normal_2: boolean;

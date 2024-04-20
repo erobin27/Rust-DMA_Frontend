@@ -6,7 +6,7 @@ import { Settings } from "./interfaces/radar/settings.interface";
 
 const defaultSettings: Settings = {
   sulfur: true,
-  stones: true,
+  stone: true,
   metal: true,
 
   crate_normal_2: true,

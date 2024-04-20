@@ -151,7 +151,7 @@ export const SideBar = ({
             />
             <Item
               title="Stones"
-              settingsKey="stones"
+              settingsKey="stone"
               img="/icons/nodes/stones.png"
               settings={settings}
               setSettings={setSettings}

@@ -2,17 +2,35 @@
 import React, { useState } from "react";
 import { useWebSocket } from "../test/websocket";
 import ReactJson from "react-json-view";
-import { Box, Button } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  NativeSelect,
+} from "@mui/material";
+
+type DataType = "Data" | "Ids" | "Remove Ids";
 
 const DataScene: React.FC = () => {
-  const { data, closeConnection } = useWebSocket();
+  const { data, ids, removeIds, isConnected, url, closeConnection } = useWebSocket();
 
   const [frozenData, setFrozenData] = useState<any>(null);
   const [isFrozen, setIsFrozen] = useState<boolean>(false);
+  const [selected, setSelected] = useState<DataType>("Data");
 
   const toggleFreeze = () => {
     if (!isFrozen) {
-      setFrozenData(data ? data : null); // Freeze the current data
+      switch (selected) {
+        case "Data":
+          setFrozenData(data ? data : {}); // Freeze the current data
+          break;
+        case "Ids":
+          setFrozenData(ids ? ids : []); // Freeze the current data
+          break;
+        case "Remove Ids":
+          setFrozenData(removeIds ? removeIds : []); // Freeze the current data
+          break;
+      }
     }
     setIsFrozen(!isFrozen); // Toggle the frozen state
   };
@@ -30,35 +48,87 @@ const DataScene: React.FC = () => {
   };
 
   return (
-    <div>
+    <Box sx={{ padding: "30px", width: "100%" }}>
+      {isConnected ? (
+        <Alert severity="success">Connected to websocket. {url}</Alert>
+      ) : (
+        <Alert severity="error">Not connected to websocket. {url}</Alert>
+      )}
       <h1>Latest WebSocket Data</h1>
       <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-        <ReactJson
-          src={isFrozen ? frozenData : data}
-          theme="apathy:inverted"
-          collapsed={false}
-          enableClipboard={false}
-          displayDataTypes={false}
-        />
+        {(() => {
+          switch (selected) {
+            case "Data":
+              return (
+                <ReactJson
+                  src={isFrozen ? frozenData : data}
+                  theme="apathy:inverted"
+                  collapsed={false}
+                  enableClipboard={false}
+                  displayDataTypes={false}
+                />
+              );
+            case "Ids":
+              return (
+                <ReactJson
+                  src={isFrozen ? frozenData : ids}
+                  theme="apathy:inverted"
+                  collapsed={false}
+                  enableClipboard={true}
+                  displayDataTypes={false}
+                />
+              );
+            case "Remove Ids":
+              return (
+                <ReactJson
+                  src={isFrozen ? frozenData : removeIds}
+                  theme="apathy:inverted"
+                  collapsed={false}
+                  enableClipboard={true}
+                  displayDataTypes={false}
+                />
+              );
+            default:
+              return null; // Always include a default return for when none of the cases match
+          }
+        })()}
       </div>
-      <Box display="flex" gap="5px">
-        <Button variant="contained" color="info" onClick={toggleFreeze}>
-          {isFrozen ? "Unfreeze Data" : "Freeze Data"}
-        </Button>
-        <Button
-          variant="contained"
-          color="info"
-          onClick={() => copyToClipboard()}
-          // disabled={isFrozen}
-        >
-          Copy
-        </Button>
 
-        <Button variant="contained" color="error" onClick={closeConnection}>
-          Disconnect WebSocket
-        </Button>
+      <Box display="flex" gap="5px">
+        <Box
+          sx={{
+            display: "flex",
+            gap: "10px",
+          }}
+        >
+          <NativeSelect
+            onChange={(e) => {
+              setSelected(e.target.value as DataType);
+            }}
+            sx={{ minWidth: "100px" }}
+            disabled={isFrozen}
+          >
+            <option value={"Data"}>Data</option>
+            <option value={"Ids"}>Ids</option>
+            <option value={"Remove Ids"}>Remove Ids</option>
+          </NativeSelect>
+          <Button variant="contained" color="info" onClick={toggleFreeze}>
+            {isFrozen ? "Unfreeze Data" : "Freeze Data"}
+          </Button>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={() => copyToClipboard()}
+            // disabled={isFrozen}
+          >
+            Copy
+          </Button>
+          <Button variant="contained" color="error" onClick={closeConnection}>
+            Disconnect WebSocket
+          </Button>
+        </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 

@@ -73,7 +73,12 @@ const execute = () => {
   ].filter(Boolean); // Filter out undefined values from environment variables
 
   console.log("\n2: ------------ FIND RUST DIRECTORY ------------");
-  let executablePath = findFile("RustClient.exe", commonPaths);
+  const game = "RustClient.exe";
+  let executablePath = findFile(game, commonPaths);
+  if (!executablePath) {
+    console.log("Could not find - ", game);
+    return;
+  }
   const directoryPath = executablePath.replace("\\RustClient.exe", "");
   if (executablePath) {
     console.log("Executable found at: " + executablePath);

@@ -47,7 +47,7 @@ const Radar: React.FC<{
   const [sceneItems, setSceneItems] = useState<ISceneItems>(defaultSceneItems);
 
   // Websocket/Data
-  const { data } = useWebSocket();
+  const { data, removeIds } = useWebSocket();
   const { settings } = props;
 
   /*
@@ -78,17 +78,21 @@ const Radar: React.FC<{
 
     // No sprite exists yet
     if (!existingSprite) {
+      console.log("creating...", input.identifier);
       const spriteMaterial = new THREE.SpriteMaterial({ map: input.texture });
       sprite = new THREE.Sprite(spriteMaterial);
       sprite.position.set(position.x, position.y, position.z);
       const scale = input.scale.clone().multiplyScalar(zoomFactor ?? 1);
       sprite.scale.set(scale.x, scale.y, input.scale.z);
       sprite.name = spriteId;
-      input.scene.add(sprite);
+
+      // Double check before adding
+      if (!input.scene.getObjectByName(spriteId)) input.scene.add(sprite);
     }
 
     // No text label exists yet and should be created
     if (!existingText && input.label) {
+      console.log("Creating text for first time.", input.identifier);
       text = await addText({
         textId,
         textString: input.label.text,
@@ -97,7 +101,10 @@ const Radar: React.FC<{
           size: input.label.size,
         },
       });
-      input.scene.add(text as THREE.Mesh);
+
+      // Double check before adding
+      if (!input.scene.getObjectByName(textId))
+        input.scene.add(text as THREE.Mesh);
     }
 
     // Set the sprite's position
@@ -124,45 +131,43 @@ const Radar: React.FC<{
     scene.clear();
   };
 
+  // Define a function to safely remove and dispose of objects
+  const safelyRemoveObject = (obj: THREE.Object3D | undefined, scene: THREE.Scene): void => {
+    if (!obj) return;
+
+    // Remove the object from the scene
+    scene.remove(obj);
+
+    // Check if the object is a Mesh and has geometry and material to dispose
+    if ((obj as THREE.Mesh).geometry) {
+      (obj as THREE.Mesh).geometry.dispose();
+    }
+    if ((obj as THREE.Mesh).material) {
+      const material = (obj as THREE.Mesh).material;
+      if (Array.isArray(material)) {
+        material.forEach((mat) => mat && mat.dispose());
+      } else {
+        material.dispose();
+      }
+    }
+  };
+
   const removeSceneItemsByIdRevised = (
     scene: THREE.Scene,
-    identifiers: string[],
+    identifiers: string[]
   ): void => {
-    identifiers.map((id) => {
+    identifiers.forEach((id) => {
       const spriteId = `${ItemTypes.SPRITE}_${id}`;
       const existingSprite = scene.getObjectByName(spriteId);
 
       const textId = `${ItemTypes.TEXT}_${id}`;
       const existingText = scene.getObjectByName(textId);
 
-      existingSprite?.remove();
-      existingText?.remove();
+      // Use the function to remove the sprite and text
+      safelyRemoveObject(existingSprite, scene);
+      safelyRemoveObject(existingText, scene);
     });
   };
-
-  // const removeSceneItemsById = (
-  //   scene: THREE.Scene,
-  //   identifiers: string[],
-  //   category: Category
-  // ): void => {
-  //   console.log("removing", identifiers);
-  //   const sceneItemsCopy = JSON.parse(JSON.stringify(sceneItems)); // Deep copy
-
-  //   for (const id of identifiers) {
-  //     const item = sceneItemsCopy[category][id];
-  //     if (!item) continue;
-  //     console.log(item);
-
-  //     const { text, dot, sprite } = item;
-  //     if (dot) scene.remove(dot as THREE.Mesh);
-  //     if (text) scene.remove(text as THREE.Mesh);
-  //     if (sprite) scene.remove(sprite as THREE.Sprite);
-
-  //     delete sceneItemsCopy[category][id];
-  //   }
-
-  //   setSceneItems(sceneItemsCopy);
-  // };
 
   /*
    ************************************
@@ -314,7 +319,7 @@ const Radar: React.FC<{
         });
 
       const stone: Item[] = nodeData.stone ?? [];
-      if (settings.stones)
+      if (settings.stone)
         stone.forEach((node) => {
           addItemRevised({
             scene,
@@ -416,6 +421,13 @@ const Radar: React.FC<{
     addOrUpdateNodes(data?.nodes);
     addOrUpdatePlayers(data?.players);
     // addOrUpdateLoot(data?.loot);
+
+    // const names: string[] = [];
+    // if (scene) scene.traverse(function (object) {
+    //   names.push(object.name); // Add the name of each object to the array
+    // });
+
+    // console.log(names);
   }, [data]);
 
   /*
@@ -461,18 +473,22 @@ const Radar: React.FC<{
     // Remove the keys set to false so that they are no longer in the scene
     const scene = sceneRef.current;
     if (!scene) return;
-    let keys;
+
+    const names: string[] = [];
+    if (scene)
+      scene.traverse(function (object) {
+        names.push(object.name); // Add the name of each object to the array
+      });
     keysToRemove.map((key) => {
       console.log("Settings changed, removing", key);
       switch (key) {
         case "sulfur":
-        case "stones":
+        case "stone":
         case "metal":
-          // keys = Object.keys(sceneItems.nodes).length
-          //   ? Object.keys(sceneItems.nodes[key])
-          //   : undefined;
-          // if (keys) removeSceneItemsByIdRevised(scene, keys);
-          console.log("TODO: Remove from scene.");
+          removeSceneItemsByIdRevised(
+            scene,
+            data?.nodes[key].map((node) => node.id) || []
+          );
           break;
         case "crate_normal_2":
         case "crate_normal_2_food":
@@ -500,6 +516,13 @@ const Radar: React.FC<{
       console.log("Updated Settings");
     });
   }, [settings]);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+
+    removeSceneItemsByIdRevised(scene, removeIds);
+  }, [removeIds]);
 
   useEffect(() => {
     const scene = sceneRef.current;
