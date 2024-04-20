@@ -59,6 +59,16 @@ const Radar: React.FC<{
    */
   const calculateCameraZoomScale = (): number => {
     return 5 / (cameraRef.current?.zoom ?? 1);
+    // return 1;
+  };
+
+  const adjustItemScale = (
+    sprite: THREE.Mesh | THREE.Sprite,
+    originalScale: THREE.Vector3
+  ) => {
+    const spriteScale = calculateCameraZoomScale();
+    const newScale = originalScale.clone().multiplyScalar(spriteScale);
+    sprite.scale.set(newScale.x, newScale.y, newScale.z);
   };
 
   const addItemRevised = async (input: AddItem): Promise<ISceneItem> => {
@@ -80,8 +90,6 @@ const Radar: React.FC<{
       const spriteMaterial = new THREE.SpriteMaterial({ map: input.texture });
       sprite = new THREE.Sprite(spriteMaterial);
       sprite.position.set(position.x, position.y, position.z);
-      const scale = input.scale.clone().multiplyScalar(zoomFactor ?? 1);
-      sprite.scale.set(scale.x, scale.y, input.scale.z);
       sprite.name = spriteId;
 
       // Double check before adding
@@ -109,6 +117,7 @@ const Radar: React.FC<{
     if (sprite) {
       const layerPosition = input.layerPosition ?? 0.1;
       sprite.position.set(position.x, position.y, layerPosition);
+      adjustItemScale(sprite, input.scale);
     }
 
     // Set the position of the text
@@ -293,7 +302,7 @@ const Radar: React.FC<{
               node.position.z
             ),
             texture: preloadedTextures.sulfur as THREE.Texture,
-            scale: new THREE.Vector3(1, 1, 1),
+            scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "nodes",
           });
@@ -311,7 +320,7 @@ const Radar: React.FC<{
               node.position.z
             ),
             texture: preloadedTextures.metal as THREE.Texture,
-            scale: new THREE.Vector3(1, 1, 1),
+            scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "nodes",
           });
@@ -329,7 +338,7 @@ const Radar: React.FC<{
               node.position.z
             ),
             texture: preloadedTextures.stone as THREE.Texture,
-            scale: new THREE.Vector3(1, 1, 1),
+            scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "nodes",
           });
@@ -359,13 +368,9 @@ const Radar: React.FC<{
             addItemRevised({
               scene,
               identifier: id,
-              position: new THREE.Vector3(
-                position.x,
-                position.y,
-                position.z
-              ),
+              position: new THREE.Vector3(position.x, position.y, position.z),
               texture: preloadedTextures[name] as THREE.Texture,
-              scale: new THREE.Vector3(1, 1, 1),
+              scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
               category: "loot",
             });
@@ -399,12 +404,12 @@ const Radar: React.FC<{
           label: {
             text: player.name,
             color: "#00FF00",
-            size: 2,
+            size: 1,
             offset: 2,
           },
           position: playerPosition,
           texture: preloadedTextures.localPlayer as THREE.Texture,
-          scale: new THREE.Vector3(0.5, 0.5, 0.5),
+          scale: new THREE.Vector3(5, 5, 1),
           zoomFactor: calculateCameraZoomScale(),
           layerPosition: 1,
           category: "players",
