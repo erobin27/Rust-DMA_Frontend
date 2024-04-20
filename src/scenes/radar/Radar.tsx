@@ -3,7 +3,6 @@ import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { useWebSocket } from "../test/websocket";
 import {
-  Category,
   ISceneItem,
   ISceneItems,
 } from "./interfaces/radar/sceneItem.interface";
@@ -14,7 +13,6 @@ import { addText, alignText } from "./helpers/text";
 import { convertGamePositionToMap, map, setupMap } from "./helpers/map";
 import { Settings } from "./interfaces/radar/settings.interface";
 import { LootContainer } from "./interfaces/game/items/lootContainer.interface";
-import { LootContainerType } from "./interfaces/game/items/lootContainers.type";
 import { IRustRadarData } from "./interfaces/game/rustRadarData.interface";
 
 const defaultSceneItems: ISceneItems = {
@@ -78,7 +76,7 @@ const Radar: React.FC<{
 
     // No sprite exists yet
     if (!existingSprite) {
-      console.log("creating...", input.identifier);
+      console.debug("creating...", input.identifier);
       const spriteMaterial = new THREE.SpriteMaterial({ map: input.texture });
       sprite = new THREE.Sprite(spriteMaterial);
       sprite.position.set(position.x, position.y, position.z);
@@ -92,7 +90,7 @@ const Radar: React.FC<{
 
     // No text label exists yet and should be created
     if (!existingText && input.label) {
-      console.log("Creating text for first time.", input.identifier);
+      console.debug("Creating text for first time.", input.identifier);
       text = await addText({
         textId,
         textString: input.label.text,
@@ -132,7 +130,10 @@ const Radar: React.FC<{
   };
 
   // Define a function to safely remove and dispose of objects
-  const safelyRemoveObject = (obj: THREE.Object3D | undefined, scene: THREE.Scene): void => {
+  const safelyRemoveObject = (
+    obj: THREE.Object3D | undefined,
+    scene: THREE.Scene
+  ): void => {
     if (!obj) return;
 
     // Remove the object from the scene
@@ -280,8 +281,6 @@ const Radar: React.FC<{
     ): void => {
       if (!scene || !nodeData) return;
 
-      // removeSceneItemsById(scene, Object.keys(sceneItems.nodes), "nodes");
-
       const sulfur: Item[] = nodeData.sulfur ?? [];
       if (settings.sulfur)
         sulfur.forEach((node) => {
@@ -342,39 +341,40 @@ const Radar: React.FC<{
     ): void => {
       if (!scene || !lootData) return;
 
-      const displayCrate = (key: LootContainerType) => {
-        if (settings[key] === undefined) {
-          // console.log(`Key not found in settings - (${key})`);
+      const displayCrateRevised = (item: LootContainer) => {
+        // console.log(item.name);
+        const { name, id, position } = item;
+
+        if (settings[name] === undefined) {
+          console.debug(`Item not found in settings - (${name})`);
           return;
         }
 
-        if (preloadedTextures[key] === undefined) {
-          console.log(`Key not found in preloadedTextures - (${key})`);
+        if (preloadedTextures[name] === undefined) {
+          console.debug(`Item not found in preloadedTextures - (${name})`);
           return;
         }
 
-        const crate: LootContainer[] = lootData[key] ?? [];
-        if (settings[key])
-          crate.forEach((node) => {
+        if (settings[name]) {
             addItemRevised({
               scene,
-              identifier: node.id,
+              identifier: id,
               position: new THREE.Vector3(
-                node.position.x,
-                node.position.y,
-                node.position.z
+                position.x,
+                position.y,
+                position.z
               ),
-              texture: preloadedTextures[key] as THREE.Texture,
-              scale: new THREE.Vector3(6, 6, 1),
+              texture: preloadedTextures[name] as THREE.Texture,
+              scale: new THREE.Vector3(1, 1, 1),
               zoomFactor: calculateCameraZoomScale(),
               category: "loot",
             });
-          });
+        }
       };
 
-      Object.keys(lootData).forEach((key) =>
-        displayCrate(key as LootContainerType)
-      );
+      lootData.forEach((loot) => {
+        displayCrateRevised(loot);
+      });
     };
 
     const addOrUpdatePlayers = async (
@@ -420,14 +420,7 @@ const Radar: React.FC<{
 
     addOrUpdateNodes(data?.nodes);
     addOrUpdatePlayers(data?.players);
-    // addOrUpdateLoot(data?.loot);
-
-    // const names: string[] = [];
-    // if (scene) scene.traverse(function (object) {
-    //   names.push(object.name); // Add the name of each object to the array
-    // });
-
-    // console.log(names);
+    addOrUpdateLoot(data?.loot);
   }, [data]);
 
   /*
@@ -480,7 +473,7 @@ const Radar: React.FC<{
         names.push(object.name); // Add the name of each object to the array
       });
     keysToRemove.map((key) => {
-      console.log("Settings changed, removing", key);
+      console.debug("Settings changed, removing", key);
       switch (key) {
         case "sulfur":
         case "stone":
@@ -503,14 +496,13 @@ const Radar: React.FC<{
         case "loot_barrel_1":
         case "loot_barrel_2":
         case "oil_barrel":
-          // keys = Object.keys(sceneItems.loot).length
-          //   ? Object.keys(sceneItems.loot[key])
-          //   : undefined;
-          // if (keys) removeSceneItemsById(scene, keys, "loot");
-          console.log("TODO: Remove from scene.");
+          removeSceneItemsByIdRevised(
+            scene,
+            data?.loot.filter(loot => loot.name === key).map(loot => loot.id) || [],
+          );
           break;
         default:
-          console.log("unknown setting change:", key);
+          console.error("unknown setting change:", key);
       }
 
       console.log("Updated Settings");

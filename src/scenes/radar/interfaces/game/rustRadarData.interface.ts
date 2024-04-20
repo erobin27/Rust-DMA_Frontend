@@ -85,5 +85,6 @@ export interface IRustRadarData {
     stone: Ore[];
     metal: Ore[];
   };
-  loot: LootContainerMessage;
+  // loot: LootContainerMessage;
+  loot: LootContainer[];
 }

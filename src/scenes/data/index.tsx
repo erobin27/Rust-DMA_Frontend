@@ -42,7 +42,7 @@ const DataScene: React.FC = () => {
         console.log("Copied data to clipboard.");
       },
       () => {
-        console.log("Failed to copy data to clipboard.");
+        console.error("Failed to copy data to clipboard.");
       }
     );
   };
