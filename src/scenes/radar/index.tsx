@@ -29,7 +29,7 @@ const RadarScene: React.FC = () => {
 
   useEffect(() => {}, []);
   return (
-    <Box display={"flex"}>
+    <Box display={"flex"} height='100vh' overflow='hidden'>
       <SideBar settings={settings} setSettings={setSettings} />
       <Radar settings={settings} />
     </Box>

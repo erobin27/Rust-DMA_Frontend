@@ -80,6 +80,7 @@ export const SideBar = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(true);
+
   return (
     <Box
       sx={{
@@ -88,6 +89,28 @@ export const SideBar = ({
         },
         "& .pro-sidebar-inner": {
           background: `${colors.primary[400]} !important`,
+
+          "& .pro-sidebar-layout": isCollapsed
+            ? { scrollbarWidth: "none" }
+            : {
+                direction: "rtl", // Right-to-left to move scrollbar to the left
+                // Styling the scrollbar
+                "&::-webkit-scrollbar": {
+                  width: "8px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "transparent",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#888",
+                  borderRadius: "4px",
+                  border: "2px solid transparent",
+                  backgroundClip: "padding-box",
+                  "&:hover": {
+                    backgroundColor: "#555",
+                  },
+                },
+              },
         },
         "& .pro-sidebar-wrapper": {
           backgroundColor: `transparent !important`,
@@ -104,6 +127,7 @@ export const SideBar = ({
         },
         "#root": {
           display: "flex",
+          overflow: "hidden",
         },
       }}
     >
