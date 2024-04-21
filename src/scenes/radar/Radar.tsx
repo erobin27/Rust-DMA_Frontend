@@ -19,7 +19,6 @@ import { LootContainer } from "./interfaces/game/items/lootContainer.interface";
 import { IRustRadarData } from "./interfaces/game/rustRadarData.interface";
 import { dragToMoveCamera } from "./helpers/dragToMove";
 
-
 const defaultSceneItems: ISceneItems = {
   players: {},
   loot: {},
@@ -314,6 +313,7 @@ const Radar: React.FC<{
               node.position.z
             ),
             texture: preloadedTextures.sulfur as THREE.Texture,
+            layerPosition: 2,
             scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "nodes",
@@ -332,6 +332,7 @@ const Radar: React.FC<{
               node.position.z
             ),
             texture: preloadedTextures.metal as THREE.Texture,
+            layerPosition: 2,
             scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "nodes",
@@ -350,6 +351,7 @@ const Radar: React.FC<{
               node.position.z
             ),
             texture: preloadedTextures.stone as THREE.Texture,
+            layerPosition: 2,
             scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "nodes",
@@ -382,6 +384,7 @@ const Radar: React.FC<{
             identifier: id,
             position: new THREE.Vector3(position.x, position.y, position.z),
             texture: preloadedTextures[name] as THREE.Texture,
+            layerPosition: 2,
             scale: new THREE.Vector3(5, 5, 1),
             zoomFactor: calculateCameraZoomScale(),
             category: "loot",
@@ -557,7 +560,12 @@ const Radar: React.FC<{
   }, [targetCameraPosition]);
 
   if (!settingsActions.following) {
-    dragToMoveCamera(sceneRef.current, cameraRef.current, rendererRef.current, calculateCameraZoomScale());
+    dragToMoveCamera(
+      sceneRef.current,
+      cameraRef.current,
+      rendererRef.current,
+      calculateCameraZoomScale()
+    );
   }
 
   return <div ref={mountRef} />;

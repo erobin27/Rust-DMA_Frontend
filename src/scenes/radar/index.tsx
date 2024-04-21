@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Radar from "./Radar";
 import { SideBar } from "./sidebar";
 import { Settings } from "./interfaces/radar/settings.interface";
+import { TopBar } from "./Topbar";
 
 const defaultSettings: Settings = {
   sulfur: true,
@@ -45,7 +46,10 @@ const RadarScene: React.FC = () => {
         setSettings={setSettings}
         settingsActions={settingsActions}
       />
-      <Radar settings={settings} settingsActions={settingsActions} />
+      <Box>
+        <TopBar settingsActions={settingsActions} />
+        <Radar settings={settings} settingsActions={settingsActions} />
+      </Box>
     </Box>
   );
 };

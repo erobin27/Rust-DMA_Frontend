@@ -168,7 +168,7 @@ export const SideBar = ({
                   overflow="hidden"
                   textOverflow="ellipsis"
                 >
-                  Menu
+                  Lovely's Menu
                 </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuRoundedIcon />
