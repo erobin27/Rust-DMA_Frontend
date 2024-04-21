@@ -2,21 +2,19 @@
 import React, { useState } from "react";
 import { useWebSocket } from "../test/websocket";
 import ReactJson from "react-json-view";
-import {
-  Alert,
-  Box,
-  Button,
-  NativeSelect,
-} from "@mui/material";
+import { Alert, Box, Button, NativeSelect } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 type DataType = "Data" | "Ids" | "Remove Ids";
 
 const DataScene: React.FC = () => {
-  const { data, ids, removeIds, isConnected, url, closeConnection } = useWebSocket();
+  const { data, ids, removeIds, isConnected, url, closeConnection } =
+    useWebSocket();
 
   const [frozenData, setFrozenData] = useState<any>(null);
   const [isFrozen, setIsFrozen] = useState<boolean>(false);
   const [selected, setSelected] = useState<DataType>("Data");
+  const navigate = useNavigate();
 
   const toggleFreeze = () => {
     if (!isFrozen) {
@@ -125,6 +123,13 @@ const DataScene: React.FC = () => {
           </Button>
           <Button variant="contained" color="error" onClick={closeConnection}>
             Disconnect WebSocket
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/")}
+          >
+            Map
           </Button>
         </Box>
       </Box>

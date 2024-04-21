@@ -17,6 +17,7 @@ import {
   Settings,
   SettingsActions,
 } from "./interfaces/radar/settings.interface";
+import { useNavigate } from "react-router-dom";
 
 interface IItem {
   title: string;
@@ -93,6 +94,8 @@ export const SideBar = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -306,23 +309,12 @@ export const SideBar = ({
                   <Button
                     variant="outlined"
                     onClick={() => {
-                      settingsActions.setRefresh(true);
+                      navigate("/data");
                     }}
                   >
-                    Refresh
+                    Data Page
                   </Button>
                   <Button variant="outlined">Deselect All</Button>
-                  <Button
-                    variant="outlined"
-                    color={settingsActions.following ? "error" : "success"}
-                    onClick={() => {
-                      settingsActions.setFollowing(!settingsActions.following);
-                    }}
-                  >
-                    {settingsActions.following
-                      ? "Disable Following"
-                      : "Enable Following"}
-                  </Button>
                   <Button variant="outlined" color="error">
                     Disconnect
                   </Button>

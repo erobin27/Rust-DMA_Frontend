@@ -4,7 +4,8 @@ export const dragToMoveCamera = (
   scene?: THREE.Scene | null,
   camera?: THREE.OrthographicCamera | null,
   renderer?: THREE.WebGLRenderer | null,
-  zoomScale?: number
+  zoomScale?: number,
+  setFollowing?: any
 ) => {
   if (!scene || !camera || !renderer || !zoomScale) return;
 
@@ -26,6 +27,7 @@ export const dragToMoveCamera = (
 
   const onMouseMove = (event) => {
     if (!isDragging) return;
+    setFollowing(false);
 
     const mousePosition = new THREE.Vector2();
     mousePosition.x = (event.clientX / window.innerWidth) * 2 - 1;

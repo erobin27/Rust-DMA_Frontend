@@ -559,14 +559,13 @@ const Radar: React.FC<{
     camera.position.setY(targetCameraPosition?.y ?? 0);
   }, [targetCameraPosition]);
 
-  if (!settingsActions.following) {
-    dragToMoveCamera(
-      sceneRef.current,
-      cameraRef.current,
-      rendererRef.current,
-      calculateCameraZoomScale()
-    );
-  }
+  dragToMoveCamera(
+    sceneRef.current,
+    cameraRef.current,
+    rendererRef.current,
+    calculateCameraZoomScale(),
+    settingsActions.setFollowing
+  );
 
   return <div ref={mountRef} />;
 };
