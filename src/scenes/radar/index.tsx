@@ -26,12 +26,26 @@ const defaultSettings: Settings = {
 
 const RadarScene: React.FC = () => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const [following, setFollowing] = useState<boolean>(true);
 
   useEffect(() => {}, []);
+
+  const settingsActions = {
+    refresh,
+    setRefresh,
+    following,
+    setFollowing,
+  };
+
   return (
-    <Box display={"flex"} height='100vh' overflow='hidden'>
-      <SideBar settings={settings} setSettings={setSettings} />
-      <Radar settings={settings} />
+    <Box display={"flex"} height="100vh" overflow="hidden">
+      <SideBar
+        settings={settings}
+        setSettings={setSettings}
+        settingsActions={settingsActions}
+      />
+      <Radar settings={settings} settingsActions={settingsActions} />
     </Box>
   );
 };

@@ -11,9 +11,14 @@ import { AddItem } from "./interfaces/radar/addItem.interface";
 import { loadTextures, preloadedTextures } from "./helpers/textures";
 import { addText, alignText } from "./helpers/text";
 import { convertGamePositionToMap, map, setupMap } from "./helpers/map";
-import { Settings } from "./interfaces/radar/settings.interface";
+import {
+  Settings,
+  SettingsActions,
+} from "./interfaces/radar/settings.interface";
 import { LootContainer } from "./interfaces/game/items/lootContainer.interface";
 import { IRustRadarData } from "./interfaces/game/rustRadarData.interface";
+import { dragToMoveCamera } from "./helpers/dragToMove";
+
 
 const defaultSceneItems: ISceneItems = {
   players: {},
@@ -28,6 +33,7 @@ const enum ItemTypes {
 
 const Radar: React.FC<{
   settings: Settings;
+  settingsActions: SettingsActions;
 }> = (props) => {
   // References
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -46,7 +52,7 @@ const Radar: React.FC<{
 
   // Websocket/Data
   const { data, removeIds } = useWebSocket();
-  const { settings } = props;
+  const { settings, settingsActions } = props;
 
   /*
    ************************************
@@ -135,6 +141,11 @@ const Radar: React.FC<{
     console.log("REFRESHING ALL");
     setSceneItems({ ...defaultSceneItems });
 
+    scene.clear();
+  };
+
+  const refreshItems = (scene: THREE.Scene): void => {
+    console.log("REFRESHING");
     scene.clear();
   };
 
@@ -290,6 +301,7 @@ const Radar: React.FC<{
     ): void => {
       if (!scene || !nodeData) return;
 
+      // logAllSceneItems(scene);
       const sulfur: Item[] = nodeData.sulfur ?? [];
       if (settings.sulfur)
         sulfur.forEach((node) => {
@@ -365,15 +377,15 @@ const Radar: React.FC<{
         }
 
         if (settings[name]) {
-            addItemRevised({
-              scene,
-              identifier: id,
-              position: new THREE.Vector3(position.x, position.y, position.z),
-              texture: preloadedTextures[name] as THREE.Texture,
-              scale: new THREE.Vector3(5, 5, 1),
-              zoomFactor: calculateCameraZoomScale(),
-              category: "loot",
-            });
+          addItemRevised({
+            scene,
+            identifier: id,
+            position: new THREE.Vector3(position.x, position.y, position.z),
+            texture: preloadedTextures[name] as THREE.Texture,
+            scale: new THREE.Vector3(5, 5, 1),
+            zoomFactor: calculateCameraZoomScale(),
+            category: "loot",
+          });
         }
       };
 
@@ -415,7 +427,7 @@ const Radar: React.FC<{
           category: "players",
         });
 
-        if (player.name.startsWith("love")) {
+        if (player.name.startsWith("love") && settingsActions.following) {
           setTargetCameraPosition(item.sprite?.clone().position);
         }
       }
@@ -426,6 +438,8 @@ const Radar: React.FC<{
     addOrUpdateNodes(data?.nodes);
     addOrUpdatePlayers(data?.players);
     addOrUpdateLoot(data?.loot);
+
+    console.log(calculateCameraZoomScale());
   }, [data]);
 
   /*
@@ -503,7 +517,9 @@ const Radar: React.FC<{
         case "oil_barrel":
           removeSceneItemsByIdRevised(
             scene,
-            data?.loot.filter(loot => loot.name === key).map(loot => loot.id) || [],
+            data?.loot
+              .filter((loot) => loot.name === key)
+              .map((loot) => loot.id) || []
           );
           break;
         default:
@@ -522,6 +538,16 @@ const Radar: React.FC<{
   }, [removeIds]);
 
   useEffect(() => {
+    if (!settingsActions.refresh) return;
+    const scene = sceneRef.current;
+    if (!scene) return;
+
+    refreshItems(scene);
+    setupMap(scene);
+    settingsActions.setRefresh(false);
+  }, [settingsActions.refresh]);
+
+  useEffect(() => {
     const scene = sceneRef.current;
     const camera = cameraRef.current;
     if (!scene || !camera) return;
@@ -529,6 +555,11 @@ const Radar: React.FC<{
     camera.position.setX(targetCameraPosition?.x ?? 0);
     camera.position.setY(targetCameraPosition?.y ?? 0);
   }, [targetCameraPosition]);
+
+  if (!settingsActions.following) {
+    dragToMoveCamera(sceneRef.current, cameraRef.current, rendererRef.current, calculateCameraZoomScale());
+  }
+
   return <div ref={mountRef} />;
 };
 

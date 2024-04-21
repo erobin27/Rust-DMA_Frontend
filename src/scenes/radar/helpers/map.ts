@@ -61,6 +61,7 @@ export const setupMap = (scene: THREE.Scene): void => {
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.setZ(0);
+    mesh.name = "MAP";
 
     // Add mesh to the scene
     scene.add(mesh);

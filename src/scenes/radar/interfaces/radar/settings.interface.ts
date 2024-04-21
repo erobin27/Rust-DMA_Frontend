@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Settings {
   sulfur: boolean;
   stone: boolean;
@@ -17,4 +18,11 @@ export interface Settings {
   oil_barrel: boolean;
 
   [key: string]: boolean;
+}
+
+export interface SettingsActions {
+  refresh: boolean;
+  setRefresh: any;
+  following: boolean;
+  setFollowing: any;
 }

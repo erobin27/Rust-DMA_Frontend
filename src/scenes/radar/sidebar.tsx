@@ -2,10 +2,21 @@
 import { useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import "react-pro-sidebar/dist/css/styles.css";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  IconButton,
+  Switch,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import { tokens } from "../../assets/theme";
-import { Settings } from "./interfaces/radar/settings.interface";
+import {
+  Settings,
+  SettingsActions,
+} from "./interfaces/radar/settings.interface";
 
 interface IItem {
   title: string;
@@ -73,9 +84,11 @@ const ItemHeading = ({ category, spacing }: IItemHeading) => {
 export const SideBar = ({
   settings,
   setSettings,
+  settingsActions,
 }: {
   settings: Settings;
   setSettings: any;
+  settingsActions: SettingsActions;
 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -154,7 +167,9 @@ export const SideBar = ({
                   color={colors.grey[100]}
                   overflow="hidden"
                   textOverflow="ellipsis"
-                ></Typography>
+                >
+                  Menu
+                </Typography>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuRoundedIcon />
                 </IconButton>
@@ -164,7 +179,6 @@ export const SideBar = ({
 
           {/* MENU ITEMS */}
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <ItemHeading category="Players" />
             <ItemHeading category="Nodes" />
             <Item
               title="Sulfur"
@@ -280,6 +294,41 @@ export const SideBar = ({
               settings={settings}
               setSettings={setSettings}
             />
+            {!isCollapsed && (
+              <Box pb="30px">
+                <ItemHeading category="Settings" />
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  gap="10px"
+                  padding="10px"
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      settingsActions.setRefresh(true);
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  <Button variant="outlined">Deselect All</Button>
+                  <Button
+                    variant="outlined"
+                    color={settingsActions.following ? "error" : "success"}
+                    onClick={() => {
+                      settingsActions.setFollowing(!settingsActions.following);
+                    }}
+                  >
+                    {settingsActions.following
+                      ? "Disable Following"
+                      : "Enable Following"}
+                  </Button>
+                  <Button variant="outlined" color="error">
+                    Disconnect
+                  </Button>
+                </Box>
+              </Box>
+            )}
           </Box>
         </Menu>
       </ProSidebar>
