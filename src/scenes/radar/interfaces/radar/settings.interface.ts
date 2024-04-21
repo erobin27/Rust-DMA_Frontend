@@ -16,6 +16,7 @@ export interface Settings {
   loot_barrel_1: boolean;
   loot_barrel_2: boolean;
   oil_barrel: boolean;
+  foodbox: boolean;
 
   [key: string]: boolean;
 }

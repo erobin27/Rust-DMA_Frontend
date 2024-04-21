@@ -60,4 +60,7 @@ export const loadTextures = (): void => {
   preloadedTextures.oil_barrel = textureLoader.load(
     "/icons/lootContainers/oil_barrel.png"
   );
+  preloadedTextures.foodbox = textureLoader.load(
+    "/icons/lootContainers/foodbox.png"
+  );
 };

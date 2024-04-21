@@ -4,6 +4,7 @@ export interface AddItem {
   scene: THREE.Scene;
   identifier: string;
   position: THREE.Vector3;
+  rotation?: number;
   texture: THREE.Texture;
   scale: THREE.Vector3;
   label?: {

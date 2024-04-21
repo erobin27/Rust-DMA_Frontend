@@ -297,6 +297,13 @@ export const SideBar = ({
               settings={settings}
               setSettings={setSettings}
             />
+            <Item
+              title="Food Box"
+              settingsKey="foodbox"
+              img="/icons/lootContainers/foodbox.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
             {!isCollapsed && (
               <Box pb="30px">
                 <ItemHeading category="Settings" />

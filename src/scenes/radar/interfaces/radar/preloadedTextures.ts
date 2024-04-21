@@ -23,6 +23,7 @@ export interface PreloadedTextures {
   loot_barrel_1?: THREE.Texture;
   loot_barrel_2?: THREE.Texture;
   oil_barrel?: THREE.Texture;
+  foodbox?: THREE.Texture;
 
   [key: string]: THREE.Texture | undefined;
 }

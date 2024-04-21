@@ -26,6 +26,7 @@ const defaultSettings: Settings = {
   loot_barrel_1: true,
   loot_barrel_2: true,
   oil_barrel: true,
+  foodbox: true,
 };
 
 const RadarScene: React.FC = () => {

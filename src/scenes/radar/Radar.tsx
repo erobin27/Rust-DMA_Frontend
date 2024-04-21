@@ -18,6 +18,7 @@ import {
 import { LootContainer } from "./interfaces/game/items/lootContainer.interface";
 import { IRustRadarData } from "./interfaces/game/rustRadarData.interface";
 import { dragToMoveCamera } from "./helpers/dragToMove";
+import { degToRad } from "three/src/math/MathUtils.js";
 
 const defaultSceneItems: ISceneItems = {
   players: {},
@@ -104,6 +105,7 @@ const Radar: React.FC<{
       const spriteMaterial = new THREE.SpriteMaterial({ map: input.texture });
       sprite = new THREE.Sprite(spriteMaterial);
       sprite.position.set(position.x, position.y, position.z);
+      if (input.rotation) sprite.material.rotation = degToRad(input.rotation);
       sprite.name = spriteId;
 
       // Double check before adding
@@ -132,6 +134,7 @@ const Radar: React.FC<{
       const layerPosition = input.layerPosition ?? 0.1;
       sprite.position.set(position.x, position.y, layerPosition);
       adjustItemScale(sprite, input.scale);
+      if (input.rotation) sprite.material.rotation = degToRad(input.rotation);
     }
 
     // Set the position of the text
@@ -436,6 +439,7 @@ const Radar: React.FC<{
             offset: 4,
           },
           position: playerPosition,
+          rotation: 90,
           texture: preloadedTextures.localPlayer as THREE.Texture,
           scale: new THREE.Vector3(5, 5, 1),
           zoomFactor: calculateCameraZoomScale(),
