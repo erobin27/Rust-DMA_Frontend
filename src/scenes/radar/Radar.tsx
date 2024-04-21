@@ -76,6 +76,15 @@ const Radar: React.FC<{
     sprite.scale.set(newScale.x, newScale.y, newScale.z);
   };
 
+  const adjustTextScale = (
+    textMesh: THREE.Mesh,
+    originalScale = new THREE.Vector3(1, 1, 1)
+  ) => {
+    const textScale = calculateCameraZoomScale(); // Function to calculate scale based on camera zoom
+    const newScale = originalScale.clone().multiplyScalar(textScale);
+    textMesh.scale.set(newScale.x, newScale.y, newScale.z);
+  };
+
   const addItemRevised = async (input: AddItem): Promise<ISceneItem> => {
     const { category, zoomFactor } = input;
     const position = convertGamePositionToMap(input.position);
@@ -129,8 +138,12 @@ const Radar: React.FC<{
     if (text) {
       const textPosition = position;
       textPosition.setZ(input.layerPosition ?? 0.1);
-      textPosition.setY(position.y - (input.label?.offset ?? 10));
+
+      textPosition.setY(
+        position.y - (input.label?.offset ?? 10) * calculateCameraZoomScale()
+      );
       alignText(text as THREE.Mesh, textPosition);
+      adjustTextScale(text as THREE.Mesh);
     }
 
     return { text: text as THREE.Mesh, sprite, originalScale: input.scale };
@@ -261,7 +274,7 @@ const Radar: React.FC<{
 
       const zoomFactor = 0.01; // Adjust this factor to control zoom sensitivity
       const minZoom = 1; // Minimum zoom level, representing the "normal size"
-      const maxZoom = 10; // Maximum zoom level, adjust as needed
+      const maxZoom = 50; // Maximum zoom level, adjust as needed
 
       // Calculate new zoom level
       let newZoom = camera.zoom + event.deltaY * -zoomFactor;
@@ -419,8 +432,8 @@ const Radar: React.FC<{
           label: {
             text: player.name,
             color: "#00FF00",
-            size: 1,
-            offset: 2,
+            size: 3,
+            offset: 4,
           },
           position: playerPosition,
           texture: preloadedTextures.localPlayer as THREE.Texture,

@@ -2,7 +2,10 @@ import { Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Radar from "./Radar";
 import { SideBar } from "./sidebar";
-import { Settings } from "./interfaces/radar/settings.interface";
+import {
+  Settings,
+  SettingsActions,
+} from "./interfaces/radar/settings.interface";
 import { TopBar } from "./Topbar";
 
 const defaultSettings: Settings = {
@@ -29,14 +32,17 @@ const RadarScene: React.FC = () => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [following, setFollowing] = useState<boolean>(true);
+  const [showText, setShowText] = useState<boolean>(true);
 
   useEffect(() => {}, []);
 
-  const settingsActions = {
+  const settingsActions: SettingsActions = {
     refresh,
     setRefresh,
     following,
     setFollowing,
+    showText,
+    setShowText,
   };
 
   return (

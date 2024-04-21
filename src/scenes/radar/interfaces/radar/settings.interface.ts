@@ -25,4 +25,6 @@ export interface SettingsActions {
   setRefresh: any;
   following: boolean;
   setFollowing: any;
+  showText: boolean;
+  setShowText: any;
 }
