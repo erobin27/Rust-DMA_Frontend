@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Radar from "./Radar";
 import { SideBar } from "./sidebar";
 import {
+  RenderLevel,
   Settings,
   SettingsActions,
 } from "./interfaces/radar/settings.interface";
@@ -34,6 +35,7 @@ const RadarScene: React.FC = () => {
   const [refresh, setRefresh] = useState<boolean>(false);
   const [following, setFollowing] = useState<boolean>(true);
   const [showText, setShowText] = useState<boolean>(true);
+  const [renderLevel, setRenderLevel] = useState<RenderLevel>(RenderLevel.BOTH);
 
   useEffect(() => {}, []);
 
@@ -44,6 +46,8 @@ const RadarScene: React.FC = () => {
     setFollowing,
     showText,
     setShowText,
+    renderLevel,
+    setRenderLevel,
   };
 
   return (

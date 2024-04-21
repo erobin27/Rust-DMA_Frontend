@@ -21,6 +21,13 @@ export interface Settings {
   [key: string]: boolean;
 }
 
+export enum RenderLevel {
+  ABOVE = 'ABOVE',
+  BELOW = 'BELOW',
+  BOTH = 'BOTH',
+  AUTO = 'AUTO',
+}
+
 export interface SettingsActions {
   refresh: boolean;
   setRefresh: any;
@@ -28,4 +35,6 @@ export interface SettingsActions {
   setFollowing: any;
   showText: boolean;
   setShowText: any;
+  renderLevel: RenderLevel;
+  setRenderLevel: any;
 }
