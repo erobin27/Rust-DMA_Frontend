@@ -31,6 +31,13 @@ const enum ItemTypes {
   SPRITE = "SPRITE",
 }
 
+const enum PlayerTypes {
+  LOCAL = 'LOCAL',
+  TEAM = 'TEAM',
+  ENEMY = 'ENEMY',
+  NPC = 'NPC',
+}
+
 const Radar: React.FC<{
   settings: Settings;
   settingsActions: SettingsActions;
@@ -86,7 +93,7 @@ const Radar: React.FC<{
     textMesh.scale.set(newScale.x, newScale.y, newScale.z);
   };
 
-  const addItemRevised = async (input: AddItem): Promise<ISceneItem> => {
+  const addItemRevised = async (input: AddItem, spriteCanUpdate = false): Promise<ISceneItem> => {
     const { category, zoomFactor } = input;
     const position = convertGamePositionToMap(input.position);
 
@@ -147,6 +154,13 @@ const Radar: React.FC<{
       );
       alignText(text as THREE.Mesh, textPosition);
       adjustTextScale(text as THREE.Mesh);
+    }
+
+    if(spriteCanUpdate && existingSprite) {
+      if(sprite.material.map?.image.src !== input.texture.source) {
+        sprite.material.map = input.texture;
+        if(text && input.label?.color) (text as THREE.Mesh).material = new THREE.MeshBasicMaterial({ color: input.label.color });
+      }
     }
 
     return { text: text as THREE.Mesh, sprite, originalScale: input.scale };
@@ -418,6 +432,9 @@ const Radar: React.FC<{
     ): Promise<void> => {
       if (!scene || !playerData) return;
 
+
+      let playerType = PlayerTypes.LOCAL;
+      const localPlayer = playerData[0]
       for (const player of playerData) {
         const playerPosition = new THREE.Vector3(
           player.position.x,
@@ -429,23 +446,93 @@ const Radar: React.FC<{
           return;
         }
 
-        const item = await addItemRevised({
-          scene,
-          identifier: player.id,
-          label: {
-            text: player.name,
-            color: "#00FF00",
-            size: 3,
-            offset: 4,
-          },
-          position: playerPosition,
-          rotation: 90,
-          texture: preloadedTextures.localPlayer as THREE.Texture,
-          scale: new THREE.Vector3(5, 5, 1),
-          zoomFactor: calculateCameraZoomScale(),
-          layerPosition: 1,
-          category: "players",
-        });
+        let item;
+        if(player.name === localPlayer.name) { 
+          playerType = PlayerTypes.LOCAL;
+        } else if (player.team === localPlayer.team) {
+          playerType = PlayerTypes.TEAM;
+        } else {
+          playerType = PlayerTypes.ENEMY;
+        }
+        console.log('player type:', playerType, player.name);
+        switch (playerType as PlayerTypes) {
+          case PlayerTypes.LOCAL:
+            item = await addItemRevised({
+              scene,
+              identifier: player.id,
+              label: {
+                text: player.name,
+                color: "#00FF00",
+                size: 3,
+                offset: 4,
+              },
+              position: playerPosition,
+              rotation: 90,
+              texture: preloadedTextures.localPlayer as THREE.Texture,
+              scale: new THREE.Vector3(5, 5, 1),
+              zoomFactor: calculateCameraZoomScale(),
+              layerPosition: 1,
+              category: "players",
+            }, false);
+            break;
+          case PlayerTypes.TEAM:
+            item = await addItemRevised({
+              scene,
+              identifier: player.id,
+              label: {
+                text: player.name,
+                color: "#00FF00",
+                size: 3,
+                offset: 4,
+              },
+              position: playerPosition,
+              rotation: 90,
+              texture: preloadedTextures.teamPlayer as THREE.Texture,
+              scale: new THREE.Vector3(5, 5, 1),
+              zoomFactor: calculateCameraZoomScale(),
+              layerPosition: 1,
+              category: "players",
+            }, true);
+            break;
+          case PlayerTypes.ENEMY:
+            item = await addItemRevised({
+              scene,
+              identifier: player.id,
+              label: {
+                text: player.name,
+                color: "#FF0000",
+                size: 3,
+                offset: 4,
+              },
+              position: playerPosition,
+              rotation: 90,
+              texture: preloadedTextures.enemyPlayer as THREE.Texture,
+              scale: new THREE.Vector3(5, 5, 1),
+              zoomFactor: calculateCameraZoomScale(),
+              layerPosition: 1,
+              category: "players",
+            }, true);
+            break;
+          case PlayerTypes.NPC:
+            item = await addItemRevised({
+              scene,
+              identifier: player.id,
+              label: {
+                text: player.name,
+                color: "#FF0000",
+                size: 3,
+                offset: 4,
+              },
+              position: playerPosition,
+              rotation: 90,
+              texture: preloadedTextures.npc as THREE.Texture,
+              scale: new THREE.Vector3(5, 5, 1),
+              zoomFactor: calculateCameraZoomScale(),
+              layerPosition: 1,
+              category: "players",
+            }, true);
+            break;
+        }
 
         if (player.name.startsWith("love") && settingsActions.following) {
           setTargetCameraPosition(item.sprite?.clone().position);

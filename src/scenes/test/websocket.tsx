@@ -42,6 +42,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   const websocketRef = useRef<WebSocket | null>(null);
 
+  
+  // const localMachineIpv4 = "192.168.1.94";
+  // const port = "9002";
   const localMachineIpv4 = "localhost";
   const port = "8765";
   const websocketUrl = `ws://${localMachineIpv4}:${port}`;
@@ -59,15 +62,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       []
     );
 
-    const lootIds = Object.values(data.loot).reduce(
-      (acc: string[], category) => {
-        if (Array.isArray(category)) {
-          acc.push(...category.map((loot) => loot.id));
-        }
-        return acc;
-      },
-      []
-    );
+    const lootIds = data.loot.map((loot) => loot.id)
 
     return [...playerIds, ...nodeIds, ...lootIds];
   };
@@ -82,8 +77,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   };
 
   useEffect(() => {
-    // const localMachineIpv4 = "192.168.1.94";
-    // const port = "9002";
     websocketRef.current = new WebSocket(websocketUrl);
 
     websocketRef.current.onopen = () => {
@@ -95,7 +88,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       const parsed = JSON.parse(event.data);
       const newIds = getIdsFromData(parsed);
 
-      // console.log("Old data", idsRef.current);
 
       const idsToRemove = findMissingIds(idsRef.current, newIds);
       setData(parsed);
