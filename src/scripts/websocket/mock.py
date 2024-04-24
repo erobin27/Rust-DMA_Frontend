@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import sys
 
 async def mock_websocket_server(port, data_file):
     async def handler(websocket, path):
@@ -23,4 +24,7 @@ async def mock_websocket_server(port, data_file):
         server.close()
         await server.wait_closed()
 
-asyncio.run(mock_websocket_server(8765, 'recorded_data.json'))
+if __name__ == "__main__":
+    # Default filename if none provided
+    filename = 'recorded/classic.json' if len(sys.argv) < 2 else sys.argv[1]
+    asyncio.run(mock_websocket_server(8765, filename))

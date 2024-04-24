@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import "react-pro-sidebar/dist/css/styles.css";
-import { Box, Icon, IconButton, Tooltip, useTheme } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip, useTheme } from "@mui/material";
 import { tokens } from "../../assets/theme";
 import {
   RenderLevel,
   SettingsActions,
 } from "./interfaces/radar/settings.interface";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
 import FormatClearIcon from "@mui/icons-material/FormatClear";
 import NearMeDisabledIcon from "@mui/icons-material/NearMeDisabled";
 import NearMeIcon from "@mui/icons-material/NearMe";
@@ -17,6 +16,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import HdrAutoIcon from "@mui/icons-material/HdrAuto";
+import { useWebSocket } from "../test/websocket";
 
 export const TopBar = ({
   settingsActions,
@@ -36,6 +36,8 @@ export const TopBar = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const { isConnected, url } = useWebSocket();
+
   return (
     <Box
       color="red"
@@ -46,6 +48,7 @@ export const TopBar = ({
         width: "100%" /* Set your desired width */,
         // height: "250px" /* Set your desired height */,
         display: "flex",
+        flexDirection: 'column',
         alignItems: "center",
         justifyContent: "center",
         // backgroundColor: "red",
@@ -152,6 +155,7 @@ export const TopBar = ({
           )
         }
       </Box>
+      { !isConnected && <Alert severity="error">Not connected to websocket. {url}</Alert> }
     </Box>
   );
 };
