@@ -467,7 +467,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: 90,
+              rotation: -player.lookAngle,
               texture: preloadedTextures.localPlayer as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
