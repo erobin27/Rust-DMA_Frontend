@@ -11,6 +11,7 @@ export const loadTextures = (): void => {
   preloadedTextures.enemyPlayer = textureLoader.load("/icons/custom/enemy.png");
   preloadedTextures.teamPlayer = textureLoader.load("/icons/custom/team.png");
   preloadedTextures.npc = textureLoader.load("/icons/custom/npc.png");
+  preloadedTextures.sleeper = textureLoader.load("/icons/custom/sleeper.png");
 
   // Nodes
   preloadedTextures.sulfur = textureLoader.load("/icons/nodes/sulfur.ore.png");

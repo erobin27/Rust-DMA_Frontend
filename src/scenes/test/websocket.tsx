@@ -14,6 +14,7 @@ const WebSocketContext = createContext<{
   ids: string[];
   removeIds: string[];
 
+  messagesPerSecond: number;
   url?: string;
   isConnected: boolean;
   closeConnection: () => void;
@@ -22,6 +23,7 @@ const WebSocketContext = createContext<{
   ids: [],
   removeIds: [],
 
+  messagesPerSecond: 0,
   url: "",
   isConnected: false,
   closeConnection: () => {},
@@ -39,14 +41,16 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const [isConnected, setIsConnected] = useState(false);
   const [removeIds, setRemoveIds] = useState<string[]>([]);
   const idsRef = useRef<string[]>([]); // Ref to keep track of ids
+  const messageCountRef = useRef(0);
+  const [messagesPerSecond, setMessagesPerSecond] = useState(0);
 
   const websocketRef = useRef<WebSocket | null>(null);
 
   
-  // const localMachineIpv4 = "192.168.1.94";
-  // const port = "9002";
-  const localMachineIpv4 = "localhost";
-  const port = "8765";
+  const localMachineIpv4 = "192.168.1.94";
+  const port = "9002";
+  // const localMachineIpv4 = "localhost";
+  // const port = "8765";
   const websocketUrl = `ws://${localMachineIpv4}:${port}`;
 
   const getIdsFromData = (data: IRustRadarData): string[] => {
@@ -79,12 +83,18 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   useEffect(() => {
     websocketRef.current = new WebSocket(websocketUrl);
 
+    const interval = setInterval(() => {
+      setMessagesPerSecond(messageCountRef.current);
+      messageCountRef.current = 0;  // Reset counter every second
+    }, 1000);
+
     websocketRef.current.onopen = () => {
       console.log("WebSocket connected");
       setIsConnected(true);
     };
 
     websocketRef.current.onmessage = (event) => {
+      messageCountRef.current++;
       const parsed = JSON.parse(event.data);
       const newIds = getIdsFromData(parsed);
 
@@ -104,10 +114,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     };
 
     websocketRef.current.onclose = () => {
+      clearInterval(interval);
       console.log("WebSocket disconnected");
     };
 
     return () => {
+      clearInterval(interval);
       websocketRef.current?.close();
       setIsConnected(false);
     };
@@ -125,6 +137,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         ids,
         removeIds,
 
+        messagesPerSecond,
         url: websocketUrl,
         isConnected,
         closeConnection,

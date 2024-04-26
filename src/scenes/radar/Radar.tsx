@@ -12,6 +12,7 @@ import { loadTextures, preloadedTextures } from "./helpers/textures";
 import { addText, alignText } from "./helpers/text";
 import { convertGamePositionToMap, map, setupMap } from "./helpers/map";
 import {
+  RenderLevel,
   Settings,
   SettingsActions,
 } from "./interfaces/radar/settings.interface";
@@ -19,6 +20,7 @@ import { LootContainer } from "./interfaces/game/items/lootContainer.interface";
 import { IRustRadarData } from "./interfaces/game/rustRadarData.interface";
 import { dragToMoveCamera } from "./helpers/dragToMove";
 import { degToRad } from "three/src/math/MathUtils.js";
+import { Position } from "./interfaces/game/position.interface";
 
 const defaultSceneItems: ISceneItems = {
   players: {},
@@ -36,6 +38,7 @@ const enum PlayerTypes {
   TEAM = 'TEAM',
   ENEMY = 'ENEMY',
   NPC = 'NPC',
+  SLEEPER = 'SLEEPER',
 }
 
 const Radar: React.FC<{
@@ -219,6 +222,23 @@ const Radar: React.FC<{
     });
   };
 
+  const shouldDisplayItem = (position: Position): boolean => {
+    const level: RenderLevel = settingsActions.renderLevel;
+
+    switch (level) {
+      case RenderLevel.ABOVE:
+        return position.y > 0;
+      case RenderLevel.BELOW:
+        return position.y < 0;
+      case RenderLevel.BOTH:
+        return true;
+      case RenderLevel.AUTO:
+        return true; // TODO: Write auto render level code here.
+      default:
+        console.error('Undefined render level provided.', level);
+        return false;
+    }
+  }
   /*
    ************************************
    *                                  *
@@ -402,6 +422,10 @@ const Radar: React.FC<{
           console.debug(`Item not found in settings - (${name})`);
           return;
         }
+        
+        if (!shouldDisplayItem(position)) {
+          return;
+        }
 
         if (preloadedTextures[name] === undefined) {
           console.debug(`Item not found in preloadedTextures - (${name})`);
@@ -423,7 +447,7 @@ const Radar: React.FC<{
       };
 
       lootData.forEach((loot) => {
-        displayCrateRevised(loot);
+        if (shouldDisplayItem(loot.position)) displayCrateRevised(loot);
       });
     };
 
@@ -449,7 +473,9 @@ const Radar: React.FC<{
         let item;
         if(player.name === localPlayer.name) { 
           playerType = PlayerTypes.LOCAL;
-        } else if (player.team === localPlayer.team) {
+        } else if(player.sleeping){
+          playerType = PlayerTypes.SLEEPER;
+        } else if (player.team === localPlayer.team && player.team !== 0) {
           playerType = PlayerTypes.TEAM;
         } else {
           playerType = PlayerTypes.ENEMY;
@@ -475,6 +501,25 @@ const Radar: React.FC<{
               category: "players",
             }, false);
             break;
+          case PlayerTypes.SLEEPER:
+            item = await addItemRevised({
+              scene,
+              identifier: player.id,
+              label: {
+                text: player.name,
+                color: "#FFFFFF",
+                size: 2,
+                offset: 4,
+              },
+              position: playerPosition,
+              rotation: 0,
+              texture: preloadedTextures.sleeper as THREE.Texture,
+              scale: new THREE.Vector3(3, 3, 1),
+              zoomFactor: calculateCameraZoomScale(),
+              layerPosition: 1,
+              category: "players",
+            }, false);
+            break;
           case PlayerTypes.TEAM:
             item = await addItemRevised({
               scene,
@@ -486,7 +531,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: 90,
+              rotation: -player.lookAngle,
               texture: preloadedTextures.teamPlayer as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -505,7 +550,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: 90,
+              rotation: -player.lookAngle,
               texture: preloadedTextures.enemyPlayer as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -524,7 +569,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: 90,
+              rotation: -player.lookAngle,
               texture: preloadedTextures.npc as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -653,6 +698,14 @@ const Radar: React.FC<{
     setupMap(scene);
     settingsActions.setRefresh(false);
   }, [settingsActions.refresh]);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+
+    refreshItems(scene);
+    setupMap(scene);
+  }, [settingsActions.renderLevel]);
 
   useEffect(() => {
     const scene = sceneRef.current;

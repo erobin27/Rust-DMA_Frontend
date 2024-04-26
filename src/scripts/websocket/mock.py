@@ -11,7 +11,7 @@ async def mock_websocket_server(port, data_file):
         while True:
             for data in data_list:
                 await websocket.send(data)
-                await asyncio.sleep(.1)  # Adjust the sleep time to match the original timing
+                await asyncio.sleep(.01)  # Adjust the sleep time to match the original timing
 
     # Set up the WebSocket server
     start_server = websockets.serve(handler, "localhost", port)

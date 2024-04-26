@@ -6,5 +6,7 @@ export interface Player {
   team: number;
   bags: number;
   holding: string;
+  lookAngle: number;
+  sleeping: boolean;
   position: Position;
 }

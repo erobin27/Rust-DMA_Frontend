@@ -2,13 +2,13 @@
 import React, { useState } from "react";
 import { useWebSocket } from "../test/websocket";
 import ReactJson from "react-json-view";
-import { Alert, Box, Button, NativeSelect } from "@mui/material";
+import { Alert, Box, Button, NativeSelect, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 type DataType = "Data" | "Ids" | "Remove Ids";
 
 const DataScene: React.FC = () => {
-  const { data, ids, removeIds, isConnected, url, closeConnection } =
+  const { messagesPerSecond, data, ids, removeIds, isConnected, url, closeConnection } =
     useWebSocket();
 
   const [frozenData, setFrozenData] = useState<any>(null);
@@ -53,6 +53,7 @@ const DataScene: React.FC = () => {
         <Alert severity="error">Not connected to websocket. {url}</Alert>
       )}
       <h1>Latest WebSocket Data</h1>
+      <Typography variant="h5">{messagesPerSecond} Messages Per Second</Typography>
       <div style={{ maxHeight: "400px", overflowY: "auto" }}>
         {(() => {
           switch (selected) {
