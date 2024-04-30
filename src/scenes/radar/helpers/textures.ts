@@ -64,4 +64,86 @@ export const loadTextures = (): void => {
   preloadedTextures.foodbox = textureLoader.load(
     "/icons/lootContainers/foodbox.png"
   );
+
+  // WEAPONS
+  preloadedTextures["rifle.ak"] = textureLoader.load(
+    "/icons/items/rifle.ak.png"
+  );
+  preloadedTextures["rifle.bolt"] = textureLoader.load(
+    "/icons/items/rifle.bolt.png"
+  );
+  preloadedTextures["rifle.l96"] = textureLoader.load(
+    "/icons/items/rifle.l96.png"
+  );
+  preloadedTextures["rifle.lr300"] = textureLoader.load(
+    "/icons/items/rifle.lr300.png"
+  );
+  preloadedTextures["rifle.m39"] = textureLoader.load(
+    "/icons/items/rifle.m39.png"
+  );
+  preloadedTextures["rifle.semiauto"] = textureLoader.load(
+    "/icons/items/rifle.semiauto.png"
+  );
+  preloadedTextures["smg.mp5"] = textureLoader.load(
+    "/icons/items/smg.mp5.png"
+  );
+  preloadedTextures["smg.thompson"] = textureLoader.load(
+    "/icons/items/smg.thompson.png"
+  );
+  preloadedTextures["shotgun.pump"] = textureLoader.load(
+    "/icons/items/shotgun.pump.png"
+  );
+  preloadedTextures["shotgun.double"] = textureLoader.load(
+    "/icons/items/shotgun.double.png"
+  );
+  preloadedTextures["pistol.python"] = textureLoader.load(
+    "/icons/items/pistol.python.png"
+  );
+  preloadedTextures["pistol.revolver"] = textureLoader.load(
+    "/icons/items/pistol.revolver.png"
+  );
+  preloadedTextures["pistol.semiauto"] = textureLoader.load(
+    "/icons/items/pistol.semiauto.png"
+  );
+  preloadedTextures["pistol.m92"] = textureLoader.load(
+    "/icons/items/pistol.m92.png"
+  );
+  preloadedTextures["rocket.launcher"] = textureLoader.load(
+    "/icons/items/rocket.launcher.png"
+  );
+  preloadedTextures["lmg.m249"] = textureLoader.load(
+    "/icons/items/lmg.m249.png"
+  );
+  preloadedTextures.minigun = textureLoader.load(
+    "/icons/items/minigun.png"
+  );
+  preloadedTextures.multiplegrenadelauncher = textureLoader.load(
+    "/icons/items/multiplegrenadelauncher.png"
+  );
+
+  // MISC ITEMS
+  preloadedTextures["explosive.satchel"] = textureLoader.load(
+    "/icons/items/explosive.satchel.png"
+  );
+  preloadedTextures["explosive.timed"] = textureLoader.load(
+    "/icons/items/explosive.timed.png"
+  );
+  preloadedTextures["ammo.rocket.basic"] = textureLoader.load(
+    "/icons/items/ammo.rocket.basic.png"
+  );
+  preloadedTextures.gunpowder = textureLoader.load(
+    "/icons/items/gunpowder.png"
+  );
+  preloadedTextures.keycard_green = textureLoader.load(
+    "/icons/items/keycard_green.png"
+  );
+  preloadedTextures.keycard_blue = textureLoader.load(
+    "/icons/items/keycard_blue.png"
+  );
+  preloadedTextures.keycard_red = textureLoader.load(
+    "/icons/items/keycard_red.png"
+  );
+  preloadedTextures["supply.signal"] = textureLoader.load(
+    "/icons/items/supply.signal.png"
+  );
 };

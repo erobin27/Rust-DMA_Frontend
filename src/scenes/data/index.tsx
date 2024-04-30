@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { useWebSocket } from "../test/websocket";
+import { useWebSocket } from "../websocket/websocket";
 import ReactJson from "react-json-view";
 import { Alert, Box, Button, NativeSelect, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";

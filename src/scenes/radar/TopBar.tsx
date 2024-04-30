@@ -16,7 +16,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import HdrAutoIcon from "@mui/icons-material/HdrAuto";
-import { useWebSocket } from "../test/websocket";
+import { useWebSocket } from "../websocket/websocket";
 
 export const TopBar = ({
   settingsActions,

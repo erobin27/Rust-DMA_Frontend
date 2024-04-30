@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
-import { useWebSocket } from "../test/websocket";
+import { useWebSocket } from "../websocket/websocket";
 import {
   ISceneItem,
   ISceneItems,
@@ -26,6 +26,7 @@ const defaultSceneItems: ISceneItems = {
   players: {},
   loot: {},
   nodes: {},
+  items: {},
 };
 
 const enum ItemTypes {
@@ -97,7 +98,6 @@ const Radar: React.FC<{
   };
 
   const addItemRevised = async (input: AddItem, spriteCanUpdate = false): Promise<ISceneItem> => {
-    const { category, zoomFactor } = input;
     const position = convertGamePositionToMap(input.position);
 
     const spriteId = `${ItemTypes.SPRITE}_${input.identifier}`;
@@ -227,9 +227,9 @@ const Radar: React.FC<{
 
     switch (level) {
       case RenderLevel.ABOVE:
-        return position.y > 0;
+        return position.y > -30;
       case RenderLevel.BELOW:
-        return position.y < 0;
+        return position.y < -30;
       case RenderLevel.BOTH:
         return true;
       case RenderLevel.AUTO:
@@ -415,7 +415,6 @@ const Radar: React.FC<{
       if (!scene || !lootData) return;
 
       const displayCrateRevised = (item: LootContainer) => {
-        // console.log(item.name);
         const { name, id, position } = item;
 
         if (settings[name] === undefined) {
@@ -480,7 +479,6 @@ const Radar: React.FC<{
         } else {
           playerType = PlayerTypes.ENEMY;
         }
-        console.log('player type:', playerType, player.name);
         switch (playerType as PlayerTypes) {
           case PlayerTypes.LOCAL:
             item = await addItemRevised({
@@ -585,13 +583,55 @@ const Radar: React.FC<{
       }
     };
 
+    const addOrUpdateDroppedItems = (
+      itemData: IRustRadarData["items"] | undefined
+    ): void => {
+      if (!scene || !itemData) return;
+
+      const displayDroppedItemRevised = (item: LootContainer) => {
+        const { name, id, position } = item;
+
+        if (settings[name] === undefined) {
+          console.debug(`Item not found in settings - (${name})`);
+          return;
+        }
+        
+        if (!shouldDisplayItem(position)) {
+          return;
+        }
+
+        if (preloadedTextures[name] === undefined) {
+          console.debug(`Item not found in preloadedTextures - (${name})`);
+          return;
+        }
+
+        if (settings[name]) {
+          console.log('adding! ', name);
+          addItemRevised({
+            scene,
+            identifier: id,
+            position: new THREE.Vector3(position.x, position.y, position.z),
+            texture: preloadedTextures[name] as THREE.Texture,
+            layerPosition: 2,
+            scale: new THREE.Vector3(5, 5, 1),
+            zoomFactor: calculateCameraZoomScale(),
+            category: "items",
+          });
+        }
+      };
+
+      itemData.forEach((item) => {
+        if (shouldDisplayItem(item.position)) displayDroppedItemRevised(item);
+      });
+    };
+    
+
     const scene = sceneRef.current;
 
     addOrUpdateNodes(data?.nodes);
     addOrUpdatePlayers(data?.players);
     addOrUpdateLoot(data?.loot);
-
-    console.log(calculateCameraZoomScale());
+    addOrUpdateDroppedItems(data?.items);
   }, [data]);
 
   /*
@@ -672,6 +712,39 @@ const Radar: React.FC<{
             data?.loot
               .filter((loot) => loot.name === key)
               .map((loot) => loot.id) || []
+          );
+          break;
+        case "lmg.m249":
+        case "minigun":
+        case "multiplegrenadelauncher":
+        case "rocket.launcher":
+        case "rifle.ak":
+        case "rifle.bolt":
+        case "rifle.l96":
+        case "rifle.lr300":
+        case "rifle.m39":
+        case "rifle.semiauto":
+        case "smg.mp5":
+        case "smg.thompson":
+        case "shotgun.double": 
+        case "shotgun.pump": 
+        case "pistol.revolver":
+        case "pistol.m92":
+        case "pistol.python":
+        case "pistol.semiauto":
+        case "explosive.satchel":
+        case "explosive.timed":
+        case "ammo.rocket.basic":
+        case "gunpowder":
+        case "keycard_green":
+        case "keycard_blue":
+        case "keycard_red":
+        case "supply.signal":
+          removeSceneItemsByIdRevised(
+            scene,
+            data?.items
+              .filter((item) => item.name === key)
+              .map((item) => item.id) || []
           );
           break;
         default:

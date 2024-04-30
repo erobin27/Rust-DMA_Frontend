@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import DataScene from "./scenes/data";
 import RadarScene from "./scenes/radar";
 import { useMode, colorModeContext } from "./assets/theme";
-import { WebSocketProvider } from "./scenes/test/websocket";
+import { WebSocketProvider } from "./scenes/websocket/websocket";
 
 function App() {
   const [theme, colorMode] = useMode();

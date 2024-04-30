@@ -72,10 +72,14 @@ export interface NodeMessage {
   metal: Ore[];
 }
 
-export interface IMessage {
-  type: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload: any;
+export interface DroppedItem {
+  id: string;
+  name: string;
+  position:{
+    x: number
+    y: number
+    z: number
+  }
 }
 
 export interface IRustRadarData {
@@ -85,6 +89,6 @@ export interface IRustRadarData {
     stone: Ore[];
     metal: Ore[];
   };
-  // loot: LootContainerMessage;
   loot: LootContainer[];
+  items: DroppedItem[]
 }

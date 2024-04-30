@@ -7,7 +7,7 @@ export interface ISceneItem {
   key?: string;
 }
 
-export type Category = "players" | "nodes" | "loot";
+export type Category = "players" | "nodes" | "loot" | "items"
 
 /*
   players: {
@@ -31,6 +31,9 @@ export interface ISceneItems {
   };
   loot: {
     [lootContainerId: string]: ISceneItem;
+  };
+  items: {
+    [itemId: string]: ISceneItem;
   };
   [key: string]: any;
 }

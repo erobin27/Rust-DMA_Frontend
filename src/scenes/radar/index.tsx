@@ -14,13 +14,14 @@ const defaultSettings: Settings = {
   stone: true,
   metal: true,
 
+  // LootContainers
   crate_normal_2: true,
   crate_normal_2_food: true,
   crate_normal_2_medical: true,
   crate_normal: true,
   crate_elite: true,
-  bradley_crate: true,
   heli_crate: true,
+  bradley_crate: true,
   crate_basic: true,
   crate_tools: true,
   supply_drop: true,
@@ -28,6 +29,40 @@ const defaultSettings: Settings = {
   loot_barrel_2: true,
   oil_barrel: true,
   foodbox: true,
+
+  // Items
+  // Weapons
+  "lmg.m249": true,
+  "minigun": true,
+  "multiplegrenadelauncher": true,
+  "rocket.launcher": true,
+  
+  "rifle.ak": true,
+  "rifle.bolt": true,
+  "rifle.l96": true,
+  "rifle.lr300": true,
+  "rifle.m39": true,
+  "rifle.semiauto": true,
+  
+  "smg.mp5": true,
+  "smg.thompson": true,
+
+  "shotgun.double": true, 
+  "shotgun.pump": true, 
+
+  "pistol.revolver": true,
+  "pistol.m92": true,
+  "pistol.python": true,
+  "pistol.semiauto": true,
+
+  "explosive.satchel": true,
+  "explosive.timed": true,
+  "ammo.rocket.basic": true,
+  "gunpowder": true,
+  "keycard_green": true,
+  "keycard_blue": true,
+  "keycard_red": true,
+  "supply.signal": true,
 };
 
 const RadarScene: React.FC = () => {

@@ -5,9 +5,7 @@ import "react-pro-sidebar/dist/css/styles.css";
 import {
   Box,
   Button,
-  FormControlLabel,
   IconButton,
-  Switch,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -85,7 +83,6 @@ const ItemHeading = ({ category, spacing }: IItemHeading) => {
 export const SideBar = ({
   settings,
   setSettings,
-  settingsActions,
 }: {
   settings: Settings;
   setSettings: any;
@@ -301,6 +298,197 @@ export const SideBar = ({
               title="Food Box"
               settingsKey="foodbox"
               img="/icons/lootContainers/foodbox.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+
+            <ItemHeading category="Weapons" spacing="40px" />
+            {/* RIFLES */}
+            <Item
+              title="AK-47"
+              settingsKey="rifle.ak"
+              img="/icons/items/rifle.ak.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Bolt Rifle"
+              settingsKey="rifle.bolt"
+              img="/icons/items/rifle.bolt.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="L96"
+              settingsKey="rifle.l96"
+              img="/icons/items/rifle.l96.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="LR-300"
+              settingsKey="rifle.lr300"
+              img="/icons/items/rifle.lr300.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="M-39"
+              settingsKey="rifle.m39"
+              img="/icons/items/rifle.m39.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="SAR"
+              settingsKey="rifle.semiauto"
+              img="/icons/items/rifle.semiauto.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            {/* SMG */}
+            <Item
+              title="MP5"
+              settingsKey="smg.mp5"
+              img="/icons/items/smg.mp5.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Thompson"
+              settingsKey="smg.thompson"
+              img="/icons/items/smg.thompson.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            {/* Shotguns */}
+            <Item
+              title="Pump Shotgun"
+              settingsKey="shotgun.pump"
+              img="/icons/items/shotgun.pump.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Double Barrel"
+              settingsKey="shotgun.double"
+              img="/icons/items/shotgun.double.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            {/* Pistols */}
+            <Item
+              title="Python"
+              settingsKey="pistol.python"
+              img="/icons/items/pistol.python.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Revolver"
+              settingsKey="pistol.revolver"
+              img="/icons/items/pistol.revolver.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="SemiAuto Pistol"
+              settingsKey="pistol.semiauto"
+              img="/icons/items/pistol.semiauto.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="M92"
+              settingsKey="pistol.m92"
+              img="/icons/items/pistol.m92.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            {/* Misc */}
+            <Item
+              title="Rock. Launcher"
+              settingsKey="rocket.launcher"
+              img="/icons/items/rocket.launcher.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="M249"
+              settingsKey="lmg.m249"
+              img="/icons/items/lmg.m249.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Minigun"
+              settingsKey="minigun"
+              img="/icons/items/minigun.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Gren. Launcher"
+              settingsKey="multiplegrenadelauncher"
+              img="/icons/items/multiplegrenadelauncher.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+
+            <ItemHeading category="Items" spacing="40px" />
+            <Item
+              title="Satchel"
+              settingsKey="explosive.satchel"
+              img="/icons/items/explosive.satchel.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="C4"
+              settingsKey="explosive.timed"
+              img="/icons/items/explosive.timed.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Rocket"
+              settingsKey="ammo.rocket.basic"
+              img="/icons/items/ammo.rocket.basic.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Gunpowder"
+              settingsKey="gunpowder"
+              img="/icons/items/gunpowder.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Green Keycard"
+              settingsKey="keycard_green"
+              img="/icons/items/keycard_green.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Blue Keycard"
+              settingsKey="keycard_blue"
+              img="/icons/items/keycard_blue.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Red Keycard"
+              settingsKey="keycard_red"
+              img="/icons/items/keycard_red.png"
+              settings={settings}
+              setSettings={setSettings}
+            />
+            <Item
+              title="Supply Signal"
+              settingsKey="supply.signal"
+              img="/icons/items/supply.signal.png"
               settings={settings}
               setSettings={setSettings}
             />

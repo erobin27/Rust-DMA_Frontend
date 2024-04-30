@@ -25,5 +25,38 @@ export interface PreloadedTextures {
   oil_barrel?: THREE.Texture;
   foodbox?: THREE.Texture;
 
+  // Weapons
+  "lmg.m249"?: THREE.Texture;
+  "minigun"?: THREE.Texture;
+  "multiplegrenadelauncher"?: THREE.Texture;
+  "rocket.launcher"?: THREE.Texture;
+  
+  "rifle.ak"?: THREE.Texture;
+  "rifle.bolt"?: THREE.Texture;
+  "rifle.l96"?: THREE.Texture;
+  "rifle.lr300"?: THREE.Texture;
+  "rifle.m39"?: THREE.Texture;
+  "rifle.semiauto"?: THREE.Texture;
+  
+  "smg.mp5"?: THREE.Texture;
+  "smg.thompson"?: THREE.Texture;
+
+  "shotgun.double"?: THREE.Texture; 
+  "shotgun.pump"?: THREE.Texture; 
+
+  "pistol.revolver"?: THREE.Texture;
+  "pistol.m92"?: THREE.Texture;
+  "pistol.python"?: THREE.Texture;
+  "pistol.semiauto"?: THREE.Texture;
+
+  "explosive.satchel"?: THREE.Texture;
+  "explosive.timed"?: THREE.Texture;
+  "ammo.rocket.basic"?: THREE.Texture;
+  "gunpowder"?: THREE.Texture;
+  "keycard_green"?: THREE.Texture;
+  "keycard_blue"?: THREE.Texture;
+  "keycard_red"?: THREE.Texture;
+  "supply.signal"?: THREE.Texture;
+
   [key: string]: THREE.Texture | undefined;
 }
