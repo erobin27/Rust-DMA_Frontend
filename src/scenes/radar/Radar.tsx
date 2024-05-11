@@ -498,6 +498,9 @@ const Radar: React.FC<{
               layerPosition: 1,
               category: "players",
             }, false);
+            if (settingsActions.following && player.name == 'love') {
+              setTargetCameraPosition(item.sprite?.clone().position);
+            }
             break;
           case PlayerTypes.SLEEPER:
             item = await addItemRevised({
@@ -575,10 +578,6 @@ const Radar: React.FC<{
               category: "players",
             }, true);
             break;
-        }
-
-        if (player.name.startsWith("love") && settingsActions.following) {
-          setTargetCameraPosition(item.sprite?.clone().position);
         }
       }
     };

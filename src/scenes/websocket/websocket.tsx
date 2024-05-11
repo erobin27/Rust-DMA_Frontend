@@ -7,26 +7,35 @@ import React, {
   useRef,
 } from "react";
 import { IRustRadarData } from "../radar/interfaces/game/rustRadarData.interface";
+import { CommandPayload, GetRecoilResponse } from "../radar/interfaces/data/commandPayload.interface";
+import { CommandType } from "../radar/interfaces/data/command.enum";
+import { LocalPlayer } from "../radar/interfaces/game/localPlayer.interface";
 
 // Create a context
 const WebSocketContext = createContext<{
   data: IRustRadarData | null;
+  localPlayerData: LocalPlayer | null,
   ids: string[];
   removeIds: string[];
+  wsError: string | null;
 
   messagesPerSecond: number;
   url?: string;
   isConnected: boolean;
   closeConnection: () => void;
+  send: (msg: string) => void;
 }>({
   data: null,
+  localPlayerData: null,
   ids: [],
   removeIds: [],
+  wsError: null,
 
   messagesPerSecond: 0,
   url: "",
   isConnected: false,
   closeConnection: () => {},
+  send: () => {},
 });
 
 type WebSocketProviderProps = {
@@ -37,6 +46,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
   const [data, setData] = useState(null);
+  const [localPlayerData, setLocalPlayerData] = useState({holding: { name: 'none'}});
+  const [wsError, setWsError] = useState(null);
   const [ids, setIds] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [removeIds, setRemoveIds] = useState<string[]>([]);
@@ -82,9 +93,32 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     return missingIds;
   };
 
+
+  /*
+      Update Game Data
+      ----------------
+      This function is called the most, it is for messages related to updating the game
+      items and information.
+  */
+  const dataUpdate = (data: IRustRadarData) => {
+    const newIds = getIdsFromData(data);
+            const idsToRemove = findMissingIds(idsRef.current, newIds);
+            setData(data as never);
+            setIds(newIds);
+            if (!(idsToRemove.length === 0 && removeIds.length === 0))
+              setRemoveIds(idsToRemove);
+            idsRef.current = newIds; // Update the ref's current value each time you setIds
+  }
+
+  const getRecoil = (data: GetRecoilResponse) => {
+    console.log(data);
+    const newLp = { ...localPlayerData, holding: data };
+    setLocalPlayerData(newLp);
+    console.log(newLp);
+  }
+  
   useEffect(() => {
     websocketRef.current = new WebSocket(websocketUrl);
-
     const interval = setInterval(() => {
       setMessagesPerSecond(messageCountRef.current);
       messageCountRef.current = 0;  // Reset counter every second
@@ -97,18 +131,21 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     websocketRef.current.onmessage = (event) => {
       messageCountRef.current++;
-      const parsed = JSON.parse(event.data);
-      const newIds = getIdsFromData(parsed);
-
-
-      const idsToRemove = findMissingIds(idsRef.current, newIds);
-      setData(parsed);
-      setIds(newIds);
-
-      if (!(idsToRemove.length === 0 && removeIds.length === 0))
-        setRemoveIds(idsToRemove);
-
-      idsRef.current = newIds; // Update the ref's current value each time you setIds
+      const parsed: CommandPayload = JSON.parse(event.data);
+      switch(parsed.type) {
+        case CommandType.NORMAL:
+          dataUpdate(parsed.data);
+          break;
+        case CommandType.RECOIL_GET:
+          console.log("get recoil");
+          getRecoil(parsed.data);
+          break;
+        case CommandType.ERR:
+          setWsError(parsed.data)
+          break;
+        default:
+          break;
+      }
     };
 
     websocketRef.current.onerror = (error) => {
@@ -132,17 +169,25 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     setIsConnected(false);
   };
 
+  const sendMessage = (msg: string) => {
+    console.log(msg);
+    websocketRef.current?.send(msg);
+  };
+
   return (
     <WebSocketContext.Provider
       value={{
         data,
+        localPlayerData,
         ids,
         removeIds,
+        wsError,
 
         messagesPerSecond,
         url: websocketUrl,
         isConnected,
         closeConnection,
+        send: sendMessage,
       }}
     >
       {children}

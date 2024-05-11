@@ -37,6 +37,20 @@ export const calculateMapScale = (
   return { width: xScale, height: yScale };
 };
 
+const gridOverlay = (onScreenWidth: number, onScreenHeight: number, originalMapWidth: number, originalMapHeight: number, scene: THREE.Scene): void => {
+  const originalGridSize = originalMapWidth - 1000;
+  const divisions = Math.ceil(originalGridSize/150);
+  const newGridSize = (originalGridSize / originalMapWidth) * onScreenWidth;
+  const gridHelper = new THREE.GridHelper(newGridSize, divisions, 0x00ff00, 0x00ff00);
+
+  const leftOffset = 0; 
+  const bottomOffset = -150; 
+  gridHelper.position.set(leftOffset, bottomOffset, 5); // Slightly elevate the grid to avoid z-fighting
+  gridHelper.rotation.x = Math.PI / 2; // Align the grid with the xy-plane
+  scene.add(gridHelper);
+}
+
+
 export const setupMap = (scene: THREE.Scene): void => {
   // Load and display image
   const loader = new THREE.TextureLoader();
@@ -65,6 +79,13 @@ export const setupMap = (scene: THREE.Scene): void => {
 
     // Add mesh to the scene
     scene.add(mesh);
+
+    // const onScreenWidth =  planeWidth;
+    // const onScreenHeight =  planeHeight;
+    // const originalMapWidth = texture.image.width;
+    // const originalMapHeight = texture.image.height;
+
+    // gridOverlay(onScreenWidth, onScreenHeight, originalMapWidth, originalMapHeight, scene);
     map = mesh;
     mapScale = calculateMapScale(geometry, texture);
     scene.background = new THREE.Color(0x3b8493);
