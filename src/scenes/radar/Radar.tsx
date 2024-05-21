@@ -498,7 +498,7 @@ const Radar: React.FC<{
               layerPosition: 1,
               category: "players",
             }, false);
-            if (settingsActions.following && player.name == 'love') {
+            if (settingsActions.following) {
               setTargetCameraPosition(item.sprite?.clone().position);
             }
             break;

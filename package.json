@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "node src/scripts/moveMap.js && vite",
+    "start": "vite",
+    "start:map": "node src/scripts/moveMap.js && vite",
     "python:install": "python -m pip install websockets",
     "python:mock": "python src/scripts/websocket/mock.py",
     "python:record": "python src/scripts/websocket/record.py",
