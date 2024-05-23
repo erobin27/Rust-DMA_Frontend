@@ -61,10 +61,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const websocketRef = useRef<WebSocket | null>(null);
 
   
-  const localMachineIpv4 = "192.168.1.94";
-  const port = "9002";
+  // const localMachineIpv4 = "192.168.1.94";
+  // const port = "9002";
   // const localMachineIpv4 = "localhost";
   // const port = "8765";
+  
+  const localMachineIpv4 = import.meta.env.VITE_WEBSOCKET_HOST;
+  const port = import.meta.env.VITE_WEBSOCKET_PORT;
   const websocketUrl = `ws://${localMachineIpv4}:${port}`;
 
   const getIdsFromData = (data: IRustRadarData): string[] => {
