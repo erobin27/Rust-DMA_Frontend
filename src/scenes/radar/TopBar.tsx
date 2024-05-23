@@ -11,6 +11,8 @@ import FormatClearIcon from "@mui/icons-material/FormatClear";
 import NearMeDisabledIcon from "@mui/icons-material/NearMeDisabled";
 import NearMeIcon from "@mui/icons-material/NearMe";
 import TitleIcon from "@mui/icons-material/Title";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
@@ -32,6 +34,8 @@ export const TopBar = ({
     setShowText,
     renderLevel,
     setRenderLevel,
+    rotate,
+    setRotate,
   } = settingsActions;
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -100,6 +104,17 @@ export const TopBar = ({
             }}
           >
             {showText ? <FormatClearIcon /> : <TitleIcon />}
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title={rotate ? "Disable Rotation" : "Enable Rotation"}>
+          <IconButton
+            color="primary"
+            onClick={() => {
+              setRotate(!rotate);
+            }}
+          >
+            {rotate ? <VisibilityIcon /> : <VisibilityOffIcon />}
           </IconButton>
         </Tooltip>
 

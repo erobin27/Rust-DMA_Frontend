@@ -71,6 +71,7 @@ const RadarScene: React.FC = () => {
   const [following, setFollowing] = useState<boolean>(true);
   const [showText, setShowText] = useState<boolean>(true);
   const [renderLevel, setRenderLevel] = useState<RenderLevel>(RenderLevel.BOTH);
+  const [rotate, setRotate] = useState<boolean>(false);
 
   useEffect(() => {}, []);
 
@@ -83,6 +84,8 @@ const RadarScene: React.FC = () => {
     setShowText,
     renderLevel,
     setRenderLevel,
+    rotate,
+    setRotate,
   };
 
   return (

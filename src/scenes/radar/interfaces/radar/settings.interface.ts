@@ -73,4 +73,6 @@ export interface SettingsActions {
   setShowText: any;
   renderLevel: RenderLevel;
   setRenderLevel: any;
+  rotate: boolean;
+  setRotate: any;
 }

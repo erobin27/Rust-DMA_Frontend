@@ -59,6 +59,9 @@ const Radar: React.FC<{
   const [targetCameraPosition, setTargetCameraPosition] = useState<
     THREE.Vector3 | undefined
   >(undefined);
+  const [targetCameraRotation, setTargetCameraRotation] = useState<
+    number
+  >(0);
   const [sceneItems, setSceneItems] = useState<ISceneItems>(defaultSceneItems);
 
   // Websocket/Data
@@ -470,6 +473,7 @@ const Radar: React.FC<{
         }
 
         let item;
+        const playerLookAngle = settingsActions.rotate ? -player.lookAngle - targetCameraRotation : -player.lookAngle;
         if(player.name === localPlayer.name) { 
           playerType = PlayerTypes.LOCAL;
         } else if(player.sleeping){
@@ -489,9 +493,10 @@ const Radar: React.FC<{
                 color: "#00FF00",
                 size: 3,
                 offset: 4,
+                rotation: playerLookAngle,
               },
               position: playerPosition,
-              rotation: -player.lookAngle,
+              rotation: settingsActions.rotate ? 0 : -player.lookAngle,
               texture: preloadedTextures.localPlayer as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -500,6 +505,9 @@ const Radar: React.FC<{
             }, false);
             if (settingsActions.following) {
               setTargetCameraPosition(item.sprite?.clone().position);
+            }
+            if (settingsActions.rotate) {
+              setTargetCameraRotation(-player.lookAngle);
             }
             break;
           case PlayerTypes.SLEEPER:
@@ -532,7 +540,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: -player.lookAngle,
+              rotation: playerLookAngle,
               texture: preloadedTextures.teamPlayer as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -551,7 +559,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: -player.lookAngle,
+              rotation: playerLookAngle,
               texture: preloadedTextures.enemyPlayer as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -570,7 +578,7 @@ const Radar: React.FC<{
                 offset: 4,
               },
               position: playerPosition,
-              rotation: -player.lookAngle,
+              rotation: playerLookAngle,
               texture: preloadedTextures.npc as THREE.Texture,
               scale: new THREE.Vector3(5, 5, 1),
               zoomFactor: calculateCameraZoomScale(),
@@ -787,6 +795,15 @@ const Radar: React.FC<{
     camera.position.setX(targetCameraPosition?.x ?? 0);
     camera.position.setY(targetCameraPosition?.y ?? 0);
   }, [targetCameraPosition]);
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+    const camera = cameraRef.current;
+    if (!scene || !camera) return;
+
+    const angle = degToRad(targetCameraRotation || 0);
+    camera.rotation.set(0,0,angle);
+  }, [targetCameraRotation]);
 
   dragToMoveCamera(
     sceneRef.current,
