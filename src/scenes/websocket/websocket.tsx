@@ -10,7 +10,7 @@ import { IRustRadarData } from "../radar/interfaces/game/rustRadarData.interface
 import { CommandPayload, GetRecoilResponse } from "../radar/interfaces/data/commandPayload.interface";
 import { CommandType } from "../radar/interfaces/data/command.enum";
 import { LocalPlayer } from "../radar/interfaces/game/localPlayer.interface";
-import { CRYPTO_KEY, xorCipher } from "./crypto";
+import { CRYPTO_KEY, decrypt, encrypt } from "./crypto";
 
 const isEncrypted = true;
 
@@ -137,7 +137,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     websocketRef.current.onmessage = (event) => {
       messageCountRef.current++;
-      const data = isEncrypted ? xorCipher(event.data, CRYPTO_KEY) : event.data;
+      const data = isEncrypted ? decrypt(event.data, CRYPTO_KEY) : event.data;
       const parsed: CommandPayload = JSON.parse(data);
       switch(parsed.type) {
         case CommandType.NORMAL:
@@ -178,7 +178,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   const sendMessage = (msg: string) => {
     console.log(msg);
-    const message = isEncrypted ? xorCipher(msg, CRYPTO_KEY) : msg
+    const message = isEncrypted ? encrypt(msg, CRYPTO_KEY) : msg
     websocketRef.current?.send(message);
   };
 
