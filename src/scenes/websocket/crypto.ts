@@ -1,5 +1,7 @@
+import { getBooleanFromEnv } from "../../utils/booleanFromEnv";
 
-export const CRYPTO_KEY = 75;
+export const CRYPTO_KEY = Number(process.env.VITE_ENCRYPTION_KEY);
+export const isEncrypted = getBooleanFromEnv(process.env.VITE_ENCRYPTION_ENABLED);
 
 // Base64 Encode Function
 const base64Encode = (data: string): string => {

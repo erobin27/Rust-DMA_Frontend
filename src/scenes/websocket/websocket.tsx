@@ -10,9 +10,7 @@ import { IRustRadarData } from "../radar/interfaces/game/rustRadarData.interface
 import { CommandPayload, GetRecoilResponse } from "../radar/interfaces/data/commandPayload.interface";
 import { CommandType } from "../radar/interfaces/data/command.enum";
 import { LocalPlayer } from "../radar/interfaces/game/localPlayer.interface";
-import { CRYPTO_KEY, decrypt, encrypt } from "./crypto";
-
-const isEncrypted = true;
+import { CRYPTO_KEY, decrypt, encrypt, isEncrypted } from "./crypto";
 
 // Create a context
 const WebSocketContext = createContext<{

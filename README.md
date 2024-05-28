@@ -111,7 +111,7 @@ Start the backend websocket server that will get the game data and enter in the 
 VITE_WEBSOCKET_HOST='192.168.1.30'
 VITE_WEBSOCKET_PORT='1234'
 VITE_ENCRYPTION_ENABLED='true'
-VITE_ENCRYPTION_VALUE='75'
+VITE_ENCRYPTION_KEY='75'
 ```
 
 #### Finding the map
