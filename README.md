@@ -30,7 +30,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/erobin27/Rust-DMA_Frontend">
-    <img src="readme/logo.png" alt="Logo" width="80" height="80">
+    <img src="readme/Logo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Rust Radar (Frontend)</h3>
